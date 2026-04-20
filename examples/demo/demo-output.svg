@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="420" viewBox="0 0 760 420" fill="none">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <path d="M0,0 L12,4 L0,8 Z" fill="currentColor" />
+    </marker>
+  </defs>
+  <rect width="760" height="420" fill="rgb(251, 250, 246)" />
+  <rect data-figvector-kind="rectangle" data-figvector-confidence="0.86" id="primitive-1" x="60" y="90" width="180" height="120" rx="10" fill="rgb(90, 132, 255)" fill-opacity="1.000" stroke="rgb(64, 95, 183)" stroke-width="2" />
+  <rect data-figvector-kind="rectangle" data-figvector-confidence="0.86" id="primitive-2" x="300" y="90" width="180" height="120" rx="10" fill="rgb(78, 196, 140)" fill-opacity="1.000" stroke="rgb(56, 141, 100)" stroke-width="2" />
+  <rect data-figvector-kind="rectangle" data-figvector-confidence="0.86" id="primitive-3" x="540" y="90" width="150" height="120" rx="10" fill="rgb(255, 174, 86)" fill-opacity="1.000" stroke="rgb(183, 125, 61)" stroke-width="2" />
+  <line data-figvector-kind="arrow" data-figvector-confidence="0.74" id="primitive-4" data-figvector-from="primitive-1" data-figvector-to="primitive-2" x1="237.0" y1="150.5" x2="304.0" y2="150.5" stroke="rgb(33, 36, 51)" stroke-width="9" stroke-linecap="round" marker-end="url(#arrowhead)" />
+  <line data-figvector-kind="arrow" data-figvector-confidence="0.74" id="primitive-5" data-figvector-from="primitive-2" data-figvector-to="primitive-3" x1="477.0" y1="150.5" x2="544.0" y2="150.5" stroke="rgb(33, 36, 51)" stroke-width="9" stroke-linecap="round" marker-end="url(#arrowhead)" />
+  <rect data-figvector-kind="region" data-figvector-confidence="0.55" id="primitive-6" x="371" y="207" width="19" height="41" fill="none" stroke="rgb(33, 36, 51)" stroke-width="2" stroke-dasharray="8 6" />
+  <ellipse data-figvector-kind="ellipse" data-figvector-confidence="0.67" id="primitive-7" cx="380.5" cy="300.5" rx="56.5" ry="55.5" fill="rgb(122, 186, 255)" fill-opacity="1.000" stroke="rgb(87, 133, 183)" stroke-width="2" />
+  <rect data-figvector-kind="rectangle" data-figvector-confidence="0.86" id="primitive-8" x="590" y="315" width="100" height="70" rx="10" fill="rgb(248, 223, 143)" fill-opacity="1.000" stroke="rgb(178, 160, 102)" stroke-width="2" />
+  <line data-figvector-kind="line" data-figvector-confidence="0.82" id="primitive-9" data-figvector-from="primitive-7" data-figvector-to="primitive-8" x1="377.0" y1="356.5" x2="590.0" y2="356.5" stroke="rgb(33, 36, 51)" stroke-width="7" stroke-linecap="round" />
+</svg>

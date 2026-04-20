@@ -1,0 +1,37 @@
+<svg width="1200" height="540" viewBox="0 0 1200 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBFAF6"/>
+      <stop offset="1" stop-color="#EEF5FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#2E3247" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="540" rx="32" fill="url(#bg)"/>
+  <text x="80" y="120" fill="#2E3247" font-size="58" font-family="Georgia, serif" font-weight="700">FigVector</text>
+  <text x="80" y="174" fill="#4E5877" font-size="24" font-family="Helvetica, Arial, sans-serif">Turn clean scientific PNG diagrams into editable vector graphics.</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="240" width="400" height="220" rx="28" fill="#FFFFFF"/>
+    <text x="110" y="285" fill="#2E3247" font-size="26" font-family="Helvetica, Arial, sans-serif" font-weight="700">Input PNG</text>
+    <rect x="118" y="325" width="110" height="74" rx="16" fill="#5A84FF"/>
+    <rect x="265" y="325" width="110" height="74" rx="16" fill="#4EC48C"/>
+    <rect x="266" y="427" width="74" height="14" rx="7" fill="#2E3247" opacity="0.85"/>
+    <line x1="228" y1="362" x2="265" y2="362" stroke="#2E3247" stroke-width="8" stroke-linecap="round"/>
+    <path d="M253 348L277 362L253 376" fill="#2E3247"/>
+    <text x="118" y="420" fill="#66728F" font-size="18" font-family="Helvetica, Arial, sans-serif">scientific diagram</text>
+  </g>
+  <path d="M520 350H685" stroke="#2E3247" stroke-width="10" stroke-linecap="round" stroke-dasharray="18 18"/>
+  <path d="M655 326L706 350L655 374" fill="#2E3247"/>
+  <g filter="url(#shadow)">
+    <rect x="720" y="160" width="400" height="300" rx="28" fill="#FFFFFF"/>
+    <text x="750" y="205" fill="#2E3247" font-size="26" font-family="Helvetica, Arial, sans-serif" font-weight="700">Editable SVG</text>
+    <rect x="772" y="255" width="118" height="88" rx="16" fill="#5A84FF" stroke="#304EA5" stroke-width="3"/>
+    <rect x="936" y="255" width="118" height="88" rx="16" fill="#4EC48C" stroke="#2F805B" stroke-width="3"/>
+    <line x1="890" y1="299" x2="936" y2="299" stroke="#2E3247" stroke-width="8" stroke-linecap="round"/>
+    <path d="M923 285L950 299L923 313" fill="#2E3247"/>
+    <circle cx="915" cy="386" r="36" fill="#7ABAFE" stroke="#3B7AD4" stroke-width="3"/>
+    <line x1="915" y1="343" x2="915" y2="351" stroke="#2E3247" stroke-width="8" stroke-linecap="round"/>
+    <text x="750" y="415" fill="#66728F" font-size="18" font-family="Helvetica, Arial, sans-serif">structured layers, objects and export hooks</text>
+  </g>
+</svg>

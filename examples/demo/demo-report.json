@@ -1,0 +1,247 @@
+{
+  "width": 760,
+  "height": 420,
+  "background": [
+    251,
+    250,
+    246,
+    255
+  ],
+  "primitives": [
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 60,
+        "y": 90,
+        "width": 180,
+        "height": 120
+      },
+      "color": [
+        90,
+        132,
+        255,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 21229,
+        "fill_ratio": 0.983,
+        "bbox_area": 21600,
+        "bucket": "rgb(72, 120, 240)",
+        "id": "primitive-1"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 300,
+        "y": 90,
+        "width": 180,
+        "height": 120
+      },
+      "color": [
+        78,
+        196,
+        140,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 21200,
+        "fill_ratio": 0.981,
+        "bbox_area": 21600,
+        "bucket": "rgb(72, 192, 120)",
+        "id": "primitive-2"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 540,
+        "y": 90,
+        "width": 150,
+        "height": 120
+      },
+      "color": [
+        255,
+        174,
+        86,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 17622,
+        "fill_ratio": 0.979,
+        "bbox_area": 18000,
+        "bucket": "rgb(240, 168, 72)",
+        "id": "primitive-3"
+      }
+    },
+    {
+      "kind": "arrow",
+      "bbox": {
+        "x": 237,
+        "y": 141,
+        "width": 67,
+        "height": 19
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.74,
+      "metadata": {
+        "area": 503,
+        "fill_ratio": 0.395,
+        "direction": "right",
+        "bbox_area": 1273,
+        "bucket": "rgb(24, 48, 48)",
+        "id": "primitive-4",
+        "connects_from": "primitive-1",
+        "connects_to": "primitive-2"
+      }
+    },
+    {
+      "kind": "arrow",
+      "bbox": {
+        "x": 477,
+        "y": 141,
+        "width": 67,
+        "height": 19
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.74,
+      "metadata": {
+        "area": 503,
+        "fill_ratio": 0.395,
+        "direction": "right",
+        "bbox_area": 1273,
+        "bucket": "rgb(24, 48, 48)",
+        "id": "primitive-5",
+        "connects_from": "primitive-2",
+        "connects_to": "primitive-3"
+      }
+    },
+    {
+      "kind": "region",
+      "bbox": {
+        "x": 371,
+        "y": 207,
+        "width": 19,
+        "height": 41
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.55,
+      "metadata": {
+        "area": 321,
+        "fill_ratio": 0.412,
+        "bbox_area": 779,
+        "bucket": "rgb(24, 48, 48)",
+        "id": "primitive-6"
+      }
+    },
+    {
+      "kind": "ellipse",
+      "bbox": {
+        "x": 324,
+        "y": 245,
+        "width": 113,
+        "height": 111
+      },
+      "color": [
+        122,
+        186,
+        255,
+        255
+      ],
+      "confidence": 0.67,
+      "metadata": {
+        "area": 9783,
+        "fill_ratio": 0.78,
+        "bbox_area": 12543,
+        "bucket": "rgb(120, 168, 240)",
+        "id": "primitive-7"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 590,
+        "y": 315,
+        "width": 100,
+        "height": 70
+      },
+      "color": [
+        248,
+        223,
+        143,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 6816,
+        "fill_ratio": 0.974,
+        "bbox_area": 7000,
+        "bucket": "rgb(240, 216, 120)",
+        "id": "primitive-8"
+      }
+    },
+    {
+      "kind": "line",
+      "bbox": {
+        "x": 377,
+        "y": 353,
+        "width": 213,
+        "height": 7
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.82,
+      "metadata": {
+        "area": 1481,
+        "fill_ratio": 0.993,
+        "bbox_area": 1491,
+        "bucket": "rgb(24, 48, 48)",
+        "id": "primitive-9",
+        "connects_from": "primitive-7",
+        "connects_to": "primitive-8"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "source_id": "primitive-1",
+      "target_id": "primitive-2",
+      "kind": "flows_to",
+      "confidence": 0.74
+    },
+    {
+      "source_id": "primitive-2",
+      "target_id": "primitive-3",
+      "kind": "flows_to",
+      "confidence": 0.74
+    },
+    {
+      "source_id": "primitive-7",
+      "target_id": "primitive-8",
+      "kind": "linked_to",
+      "confidence": 0.82
+    }
+  ]
+}

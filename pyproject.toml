@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "figvector"
+version = "0.1.0"
+description = "Turn scientific PNG diagrams into editable vector graphics."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Jasvina & Codex" }]
+license = { text = "MIT" }
+keywords = ["svg", "vectorization", "scientific-figures", "diagram", "png"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+[project.scripts]
+figvector = "figvector.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

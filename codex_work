@@ -1,0 +1,171 @@
+# codex_work
+
+给后续 Codex / 新接手的 AI 的说明：
+
+这个文件是 FigVector 的连续工作台账与上下文恢复入口。到目前为止，这个项目的**计划 + 执行 + 结果 + 验证 + 下一步计划**都应该优先记录在这里。一个完全没有历史上下文的 AI 接手时，**先读这个文件，再看 README 和代码**，就可以快速知道项目做到哪里、为什么这样做、验证结果如何，以及下一步最值得推进的工作。后续每次重要修改后，都应继续在本文件追加时间记录，而不是只改代码不留痕迹。
+
+---
+
+## 2026年04月20日23时12分
+### 做了什么
+- 初始化 FigVector 本地仓库骨架。
+- 创建 `pyproject.toml`、`.gitignore`、`src/figvector/`、`tests/`、`docs/assets/` 的基础结构。
+- 搭建 CLI 入口 `src/figvector/cli.py`，支持 `vectorize` 与 `demo` 两个子命令。
+- 绘制 README 用的可视化资源 `docs/assets/figvector-hero.svg` 与 `docs/assets/figvector-pipeline.svg`。
+
+### 取得的效果
+- 项目从“只有名字”推进到“有可运行代码骨架、可写 README、可继续扩展”的状态。
+- 仓库已经具备一个清晰的 Python 包入口，方便后续迭代。
+
+### 当时的计划
+- 先完成零依赖 MVP，把 PNG 解码、图元分割、SVG 导出跑通。
+
+### 下一步计划
+- 实现纯 stdlib 的 PNG 读写器，避免一开始引入 Pillow/OpenCV 依赖。
+
+---
+
+## 2026年04月20日23时15分
+### 做了什么
+- 实现 `src/figvector/png.py`。
+- 支持非交错、8-bit 的 PNG 读取与写出，输出统一的 RGBA 栅格模型。
+- 补充 `tests/test_png.py`，验证 round-trip 读写正确性。
+
+### 取得的效果
+- FigVector 已经可以在不依赖第三方库的情况下读取 PNG 并生成新的 PNG。
+- 后续的分析器与 demo 生成都可以建立在统一的像素表示上。
+
+### 当时的计划
+- 在拿到稳定像素数据后，开始做最小可用的图元分割与分类。
+
+### 下一步计划
+- 做背景估计、颜色量化与连通域分析，尝试把框、圆、箭头、线段拆出来。
+
+---
+
+## 2026年04月20日23时20分
+### 做了什么
+- 实现 `src/figvector/analysis.py`。
+- 加入背景估计、颜色量化、按颜色桶进行连通域提取。
+- 加入首版启发式分类：`rectangle`、`ellipse`、`line`、`arrow`、`region`。
+- 修正了最初“整张图被一个大连通域吞掉”的问题，改成按颜色拆分后再做组件检测。
+
+### 取得的效果
+- 仓库第一次具备了“真正把一张图拆成多个对象”的能力。
+- 对于干净、颜色区分明显的科研示意图，效果已经明显比单纯 bitmap trace 更接近“结构恢复”。
+
+### 当时的计划
+- 把检测结果导出成 SVG，并做一套可复现 demo。
+
+### 下一步计划
+- 完成 `pipeline`、`export_svg`、`demo`，让用户能够一条命令看到输入/输出。
+
+---
+
+## 2026年04月20日23时29分
+### 做了什么
+- 完成 `src/figvector/pipeline.py` 与 `src/figvector/export_svg.py` 的首版闭环。
+- 新增 `src/figvector/relations.py`，实现基础关系恢复：
+  - 为 primitive 分配稳定 `id`
+  - 对 `arrow` / `line` 寻找最近对象
+  - 推断 `connects_from` / `connects_to`
+  - 在 scene graph JSON 中生成 `relations`
+- 更新 SVG 导出逻辑，在连接器对象上写入 `data-figvector-from` / `data-figvector-to`。
+
+### 取得的效果
+- FigVector 不只是导出形状，还能恢复一部分对象关系。
+- 这让项目方向更接近真正的 `scene graph reconstruction`，而不只是“把彩色块换成 SVG 形状”。
+
+### 当时的计划
+- 生成真实 demo 资产，并据此写 README 展示效果。
+
+### 下一步计划
+- 生成 `examples/demo/` 下的样例 PNG/SVG/JSON，并补测试验证关系恢复是否输出成功。
+
+---
+
+## 2026年04月20日23时30分
+### 做了什么
+- 更新 `tests/test_pipeline.py`。
+- 增加对 demo 资产、SVG 导出、以及关系属性存在性的 smoke test。
+
+### 取得的效果
+- 当前 MVP 的关键路径已经有自动化回归保障：
+  - demo 能生成
+  - SVG 能导出
+  - report 能输出
+  - connector relation 元数据可见
+
+### 当时的计划
+- 用 demo 生成的产物完善 README 和项目叙事。
+
+### 下一步计划
+- 生成 `examples/demo/demo-input.png`、`examples/demo/demo-output.svg`、`examples/demo/demo-report.json`。
+
+---
+
+## 2026年04月20日23时31分
+### 做了什么
+- 运行 `PYTHONPATH=src python3 -m figvector demo --output-dir examples/demo`。
+- 生成 demo 输入 PNG、输出 SVG、以及 scene graph JSON report。
+
+### 取得的效果
+- 仓库现在有了可展示、可复现、可放进 README 的样例结果。
+- 当前 demo 已能恢复 3 个矩形、1 个椭圆、2 个箭头、1 条连接线，并恢复 3 条基础关系。
+
+### 当时的计划
+- 把这些成果写进 README，明确这个仓库“现在做到了什么”。
+
+### 下一步计划
+- 完成一版图文并茂 README，写清楚愿景、当前能力、边界与 roadmap。
+
+---
+
+## 2026年04月20日23时34分
+### 做了什么
+- 完成 `README.md` 的首版撰写与整理。
+- README 里加入：
+  - 项目定位
+  - MVP 范围
+  - 图示资源
+  - demo 结果
+  - quickstart
+  - 目录结构
+  - roadmap
+  - 研究 framing
+- 在 README 中同步反映“颜色桶分割”“关系恢复”等当前已实现能力。
+
+### 取得的效果
+- 仓库不再只是代码集合，而是一个对外可读、可传播、可继续协作的开源项目雏形。
+- 新来的人可以快速看懂：这个项目为什么重要、现在做到哪里、后面要做什么。
+
+### 当时的计划
+- 把仓库放到用户指定的本地 GitHub 工作目录，并在新位置继续开发。
+
+### 下一步计划
+- 将本地代码迁移到 `/Users/jasvina/jasvina_github/FigVector`，并确认测试仍然通过。
+
+---
+
+## 2026年04月20日23时35分
+### 做了什么
+- 按用户新要求，将仓库放到：`/Users/jasvina/jasvina_github/FigVector`
+- 在该新路径重新确认远程地址：`origin = https://github.com/Jasvina/FigVector.git`
+- 运行测试：`PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 新增本文件 `codex_work` 作为项目连续工作记录。
+
+### 取得的效果
+- 当前**唯一应该继续工作的本地仓库路径**已经明确：`/Users/jasvina/jasvina_github/FigVector`
+- 基础代码、README、demo、测试都已经落到正确目录。
+- 自动化验证结果：`3 tests OK`
+
+### 当前结论
+- 仓库已经具备一个零依赖、可运行、可演示的首版 MVP。
+- 目前最重要的事实：FigVector 已经从概念进入了“scene graph + editable SVG”方向上的真实工程实现阶段。
+
+### 下一步最值得推进的工作
+1. 做文字恢复接口：先设计 OCR adapter，而不是马上绑定某个具体依赖。
+2. 做更强的 connector / polyline / curved-arrow 重建。
+3. 为真实 `Nano Banana` PNG 建立一个小型评测集，而不是只依赖 synthetic demo。
+4. 设计 draw.io 导出格式，开始验证“可继续编辑”这件事在真实工具链中的表现。
+5. 每次新增功能后，继续把计划、执行、结果、验证、下一步追加到本文件。

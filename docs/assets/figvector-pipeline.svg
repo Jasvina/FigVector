@@ -1,0 +1,33 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="420" rx="28" fill="#FBFAF6"/>
+  <text x="70" y="90" fill="#2E3247" font-size="42" font-family="Georgia, serif" font-weight="700">MVP pipeline</text>
+  <text x="70" y="130" fill="#66728F" font-size="22" font-family="Helvetica, Arial, sans-serif">From raster pixels to a scene graph and editable SVG.</text>
+  <g font-family="Helvetica, Arial, sans-serif">
+    <rect x="70" y="190" width="220" height="140" rx="22" fill="#FFFFFF" stroke="#D8E0EE" stroke-width="2"/>
+    <text x="102" y="235" fill="#2E3247" font-size="24" font-weight="700">1. PNG decode</text>
+    <text x="102" y="273" fill="#66728F" font-size="18">Pure stdlib reader</text>
+    <text x="102" y="302" fill="#66728F" font-size="18">RGBA raster model</text>
+
+    <rect x="350" y="190" width="220" height="140" rx="22" fill="#FFFFFF" stroke="#D8E0EE" stroke-width="2"/>
+    <text x="381" y="235" fill="#2E3247" font-size="24" font-weight="700">2. Segment</text>
+    <text x="381" y="273" fill="#66728F" font-size="18">Background estimate</text>
+    <text x="381" y="302" fill="#66728F" font-size="18">Connected components</text>
+
+    <rect x="630" y="190" width="220" height="140" rx="22" fill="#FFFFFF" stroke="#D8E0EE" stroke-width="2"/>
+    <text x="662" y="235" fill="#2E3247" font-size="24" font-weight="700">3. Classify</text>
+    <text x="662" y="273" fill="#66728F" font-size="18">Rect / ellipse</text>
+    <text x="662" y="302" fill="#66728F" font-size="18">Line / arrow / region</text>
+
+    <rect x="910" y="190" width="220" height="140" rx="22" fill="#FFFFFF" stroke="#D8E0EE" stroke-width="2"/>
+    <text x="941" y="235" fill="#2E3247" font-size="24" font-weight="700">4. Export</text>
+    <text x="941" y="273" fill="#66728F" font-size="18">Scene graph JSON</text>
+    <text x="941" y="302" fill="#66728F" font-size="18">Editable SVG layers</text>
+
+    <path d="M290 260H350" stroke="#2E3247" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 12"/>
+    <path d="M333 246L360 260L333 274" fill="#2E3247"/>
+    <path d="M570 260H630" stroke="#2E3247" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 12"/>
+    <path d="M613 246L640 260L613 274" fill="#2E3247"/>
+    <path d="M850 260H910" stroke="#2E3247" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 12"/>
+    <path d="M893 246L920 260L893 274" fill="#2E3247"/>
+  </g>
+</svg>
