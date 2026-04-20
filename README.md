@@ -25,10 +25,13 @@
 
 - 纯 Python 3.11、零第三方依赖的 PNG 读取器；
 - 基于背景估计 + 颜色量化 + 连通域的基础分割；
-- 对干净图元做首版分类：`rectangle` / `ellipse` / `line` / `arrow` / `region`；
+- 对干净图元做首版分类：`rectangle` / `ellipse` / `line` / `arrow` / `polyline` / `region`；
 - 把检测结果导出成可编辑 `SVG`；
+- 导出 `draw.io` XML，方便继续在 diagrams.net 里编辑；
 - 对箭头/连线做首版关系恢复，推断 `connects_from` / `connects_to`；
-- 额外导出结构化 `JSON report`，为后续 OCR 和更强的 scene graph 打底；
+- 提供可插拔 OCR adapter，当前支持 `none` / `sidecar-json` / `tesseract-cli`；
+- 提供真实 `Nano Banana` PNG 样例集脚手架，方便把 repo 从 synthetic demo 推向真实评测；
+- 额外导出结构化 `JSON report`，为后续更强的 scene graph 打底；
 - 生成一套可复现的 demo 输入/输出，方便我们持续迭代。
 
 这不是最终算法，但它已经把仓库从“想法”推进到了“可运行的最小原型”。
@@ -39,9 +42,9 @@
 
 ### Synthetic demo
 
-| Input PNG | Output SVG |
-| --- | --- |
-| ![demo input](examples/demo/demo-input.png) | ![demo output](examples/demo/demo-output.svg) |
+| Input PNG | Output SVG | Extra artifacts |
+| --- | --- | --- |
+| ![demo input](examples/demo/demo-input.png) | ![demo output](examples/demo/demo-output.svg) | `examples/demo/demo-input.ocr.json`, `examples/demo/demo-output.drawio`, `examples/demo/demo-report.json` |
 
 ## MVP direction
 
@@ -55,16 +58,18 @@
 
 - 单张 PNG 输入
 - 白底或浅底示意图
-- 彩色块、圆形、连线、箭头
-- `SVG` 导出
+- 彩色块、圆形、连线、箭头、折线
+- `SVG` + `draw.io` 导出
+- OCR sidecar / Tesseract CLI 接口
 - JSON scene report
+- 真实样例集脚手架
 
 ### Not in scope yet
 
-- 通用 OCR
+- 高质量端到端通用 OCR
 - 多 panel 复杂论文 figure 的完整重建
 - 热图、显微图、自然图像
-- Figma / draw.io round-trip
+- Figma round-trip
 - 复杂曲线与高保真样式恢复
 
 ## How the current pipeline works
@@ -75,9 +80,12 @@ flowchart LR
     B --> C[Background estimation]
     C --> D[Color buckets + connected components]
     D --> E[Primitive classification]
-    E --> F[Relation recovery]
-    F --> G[Scene graph JSON]
-    F --> H[Editable SVG export]
+    E --> F[OCR adapter]
+    E --> G[Relation recovery]
+    F --> G
+    G --> H[Scene graph JSON]
+    G --> I[Editable SVG export]
+    G --> J[draw.io export]
 ```
 
 当前实现的思路是：
@@ -86,9 +94,10 @@ flowchart LR
 2. **Segment** - 估计背景色，把非背景像素聚成连通域；
 3. **Bucket by color** - 用颜色桶把相连但语义不同的图元拆开；
 4. **Classify** - 用几何启发式把连通域近似分类成基础图元；
-5. **Relate** - 对箭头/连线寻找最近对象，恢复基础连接关系；
-6. **Export** - 输出 SVG 对象与 JSON 报告；
-7. **Prepare for the next stage** - 后续把 OCR、语义校正和更复杂关系接到 scene graph 上。
+5. **Read text** - 通过 OCR adapter 引入文字框，目前支持 sidecar 与本地 Tesseract CLI；
+6. **Relate** - 对箭头/折线寻找最近对象，同时把文字挂到最邻近对象上；
+7. **Export** - 输出 SVG、draw.io 和 JSON 报告；
+8. **Prepare for the next stage** - 后续把更强 OCR、语义校正和更复杂关系接到 scene graph 上。
 
 ## Quickstart
 
@@ -101,10 +110,27 @@ PYTHONPATH=src python3 -m figvector demo --output-dir examples/demo
 ### 2. Vectorize your own PNG
 
 ```bash
-PYTHONPATH=src python3 -m figvector vectorize path/to/input.png -o output.svg --report output.json
+PYTHONPATH=src python3 -m figvector vectorize path/to/input.png \
+  -o output.svg \
+  --report output.json \
+  --drawio-output output.drawio \
+  --ocr-backend sidecar-json \
+  --ocr-sidecar path/to/input.ocr.json
 ```
 
-### 3. Run tests
+### 3. Create the real-sample scaffold
+
+```bash
+PYTHONPATH=src python3 -m figvector dataset-init datasets/nano_banana
+```
+
+### 4. Batch-run the real-sample scaffold
+
+```bash
+PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json
+```
+
+### 5. Run tests
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests
@@ -115,19 +141,31 @@ PYTHONPATH=src python3 -m unittest discover -s tests
 ```text
 FigVector/
 ├── README.md
+├── codex_work
+├── datasets/nano_banana/
+│   ├── README.md
+│   ├── manifest.json
+│   ├── inbox/
+│   ├── ocr_sidecars/
+│   └── outputs/
 ├── docs/assets/
 │   ├── figvector-hero.svg
 │   └── figvector-pipeline.svg
 ├── examples/demo/
 │   ├── demo-input.png
+│   ├── demo-input.ocr.json
+│   ├── demo-output.drawio
 │   ├── demo-output.svg
 │   └── demo-report.json
 ├── src/figvector/
 │   ├── analysis.py
 │   ├── cli.py
+│   ├── dataset.py
 │   ├── demo.py
+│   ├── export_drawio.py
 │   ├── export_svg.py
 │   ├── models.py
+│   ├── ocr.py
 │   ├── pipeline.py
 │   ├── png.py
 │   └── relations.py
@@ -142,21 +180,23 @@ FigVector/
 - [x] PNG decoder / writer
 - [x] Primitive segmentation
 - [x] SVG export
+- [x] draw.io export
 - [x] Baseline relation recovery
+- [x] OCR adapter layer
+- [x] Real-sample dataset scaffold
 - [x] Demo assets and smoke tests
-- [ ] Primitive relationships (`connects_to`, `contains_label`, `group_with`)
+- [ ] Primitive relationships (`contains_label`, `group_with`, richer flow semantics)
 
 ### Phase 2 - Make it useful on real Nano Banana figures
 
-- [ ] OCR integration for text boxes and labels
-- [ ] Better arrow and polyline reconstruction
+- [ ] Better OCR quality on real figures
+- [ ] Better curved-arrow and multi-bend polyline reconstruction
 - [ ] Rounded rectangle / capsule / icon detection
 - [ ] Layer ordering and grouping
-- [ ] More realistic evaluation fixtures
+- [ ] Real labeled evaluation fixtures
 
 ### Phase 3 - Make it a real open-source tool
 
-- [ ] draw.io export
 - [ ] Web demo / local app
 - [ ] Pluggable VLM-assisted correction
 - [ ] Dataset and benchmark for scientific figure vectorization
@@ -183,7 +223,7 @@ FigVector/
 当前版本还很早期，务必诚实看待：
 
 - 主要验证基础工程骨架，而不是最终识别质量；
-- 文本尚未恢复；
+- OCR 目前更像 adapter 层，还不是最终识别能力；
 - 对复杂真实科研图还不够强；
 - 分类依赖启发式，后续需要数据和模型来增强。
 

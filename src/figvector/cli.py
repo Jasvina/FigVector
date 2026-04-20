@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
+from .dataset import create_dataset_scaffold, run_dataset
 from .demo import build_demo_assets
+from .ocr import OCRConfig
 from .pipeline import vectorize_png
 
 
@@ -15,11 +18,22 @@ def build_parser() -> argparse.ArgumentParser:
     vectorize.add_argument("input", help="Path to the source PNG file.")
     vectorize.add_argument("-o", "--output", required=True, help="Path to the output SVG file.")
     vectorize.add_argument("--report", help="Optional JSON report path.")
+    vectorize.add_argument("--drawio-output", help="Optional draw.io XML output path.")
     vectorize.add_argument("--background-threshold", type=int, default=38, help="Color distance threshold for foreground detection.")
     vectorize.add_argument("--min-area", type=int, default=32, help="Minimum connected-component area to keep.")
+    vectorize.add_argument("--ocr-backend", default="none", choices=["none", "sidecar-json", "tesseract-cli"], help="OCR backend to use for text recovery.")
+    vectorize.add_argument("--ocr-sidecar", help="Optional OCR sidecar JSON path.")
 
     demo = subparsers.add_parser("demo", help="Generate a synthetic demo PNG and vectorize it.")
     demo.add_argument("--output-dir", default="examples/demo", help="Directory where demo assets will be written.")
+
+    dataset_init = subparsers.add_parser("dataset-init", help="Create a real-sample dataset scaffold for Nano Banana PNGs.")
+    dataset_init.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
+
+    dataset_run = subparsers.add_parser("dataset-run", help="Vectorize every sample registered in a dataset manifest.")
+    dataset_run.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
+    dataset_run.add_argument("--output-dir", help="Optional output directory override.")
+    dataset_run.add_argument("--ocr-backend", default="none", choices=["none", "sidecar-json", "tesseract-cli"], help="OCR backend for dataset processing.")
 
     return parser
 
@@ -33,16 +47,33 @@ def main(argv: list[str] | None = None) -> int:
             input_path=args.input,
             output_path=args.output,
             report_path=args.report,
+            drawio_path=args.drawio_output,
             background_threshold=args.background_threshold,
             min_area=args.min_area,
+            ocr=OCRConfig(backend=args.ocr_backend, sidecar_path=args.ocr_sidecar),
         )
         print(f"Wrote SVG to {Path(args.output).resolve()}")
         if args.report:
             print(f"Wrote report to {Path(args.report).resolve()}")
+        if args.drawio_output:
+            print(f"Wrote draw.io file to {Path(args.drawio_output).resolve()}")
         return 0
 
-    result = build_demo_assets(args.output_dir)
-    print(f"Wrote demo PNG to {result['png'].resolve()}")
-    print(f"Wrote demo SVG to {result['svg'].resolve()}")
-    print(f"Wrote demo report to {result['report'].resolve()}")
+    if args.command == "demo":
+        result = build_demo_assets(args.output_dir)
+        print(f"Wrote demo PNG to {result['png'].resolve()}")
+        print(f"Wrote demo OCR sidecar to {result['ocr'].resolve()}")
+        print(f"Wrote demo SVG to {result['svg'].resolve()}")
+        print(f"Wrote demo report to {result['report'].resolve()}")
+        print(f"Wrote demo draw.io file to {result['drawio'].resolve()}")
+        return 0
+
+    if args.command == "dataset-init":
+        result = create_dataset_scaffold(args.root)
+        print(f"Wrote dataset scaffold to {Path(result['root']).resolve()}")
+        print(f"Manifest: {Path(result['manifest']).resolve()}")
+        return 0
+
+    result = run_dataset(args.root, output_dir=args.output_dir, ocr_backend=args.ocr_backend)
+    print(json.dumps(result, indent=2))
     return 0

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from .models import RasterImage
+from .ocr import OCRConfig
 from .pipeline import vectorize_png
 from .png import write_png
 
@@ -17,13 +19,22 @@ def build_demo_assets(output_dir: str | Path) -> dict[str, Path]:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     png_path = output_dir / "demo-input.png"
+    ocr_path = output_dir / "demo-input.ocr.json"
     svg_path = output_dir / "demo-output.svg"
     report_path = output_dir / "demo-report.json"
+    drawio_path = output_dir / "demo-output.drawio"
 
     image = _demo_image()
     write_png(png_path, image)
-    vectorize_png(png_path, svg_path, report_path)
-    return {"png": png_path, "svg": svg_path, "report": report_path}
+    ocr_path.write_text(json.dumps(_demo_ocr_sidecar(), indent=2), encoding="utf-8")
+    vectorize_png(
+        png_path,
+        svg_path,
+        report_path=report_path,
+        drawio_path=drawio_path,
+        ocr=OCRConfig(backend="sidecar-json", sidecar_path=str(ocr_path)),
+    )
+    return {"png": png_path, "ocr": ocr_path, "svg": svg_path, "report": report_path, "drawio": drawio_path}
 
 
 def _demo_image() -> RasterImage:
@@ -40,10 +51,23 @@ def _demo_image() -> RasterImage:
     _arrow_head(pixels, 540, 150, "right", INK)
     _line(pixels, 380, 210, 380, 244, INK, 6)
     _arrow_head(pixels, 380, 244, "down", INK)
-    _line(pixels, 380, 356, 610, 356, INK, 6)
-    _arrow_head(pixels, 610, 356, "right", INK)
+    _line(pixels, 437, 300, 500, 300, INK, 6)
+    _line(pixels, 500, 300, 500, 350, INK, 6)
+    _line(pixels, 500, 350, 590, 350, INK, 6)
     _rounded_rect(pixels, 590, 315, 100, 70, 12, (248, 223, 143, 255))
     return RasterImage(width=width, height=height, pixels=pixels)
+
+
+def _demo_ocr_sidecar() -> dict[str, object]:
+    return {
+        "texts": [
+            {"text": "Prompt", "bbox": {"x": 100, "y": 130, "width": 90, "height": 24}, "confidence": 0.99},
+            {"text": "Encoder", "bbox": {"x": 340, "y": 130, "width": 100, "height": 24}, "confidence": 0.99},
+            {"text": "Output", "bbox": {"x": 575, "y": 130, "width": 90, "height": 24}, "confidence": 0.99},
+            {"text": "Signal", "bbox": {"x": 347, "y": 293, "width": 75, "height": 24}, "confidence": 0.98},
+            {"text": "Editable", "bbox": {"x": 600, "y": 337, "width": 90, "height": 24}, "confidence": 0.98},
+        ]
+    }
 
 
 def _rounded_rect(pixels, x, y, width, height, radius, color):

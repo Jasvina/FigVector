@@ -71,7 +71,7 @@ class RasterAnalyzer:
 
         kind = "region"
         confidence = 0.45
-        metadata: dict[str, str | float | int] = {
+        metadata: dict[str, object] = {
             "area": area,
             "fill_ratio": round(fill_ratio, 3),
         }
@@ -80,6 +80,10 @@ class RasterAnalyzer:
             kind = "arrow"
             confidence = 0.74
             metadata["direction"] = _arrow_direction(component, bbox)
+        elif _looks_like_polyline(component, bbox, fill_ratio):
+            kind = "polyline"
+            confidence = 0.76
+            metadata["points"] = _polyline_points(component, bbox)
         elif min(bbox.width, bbox.height) <= 8 and max(bbox.width, bbox.height) >= 18:
             kind = "line"
             confidence = 0.82
@@ -147,6 +151,110 @@ def _looks_like_arrow(component: list[tuple[int, int]], bbox: BoundingBox) -> bo
         bottom_spread = _horizontal_spread(component, bbox, 0.8)
         return max(top_spread, bottom_spread) >= min(top_spread, bottom_spread) * 1.8
     return False
+
+
+def _looks_like_polyline(component: list[tuple[int, int]], bbox: BoundingBox, fill_ratio: float) -> bool:
+    if bbox.width < 20 or bbox.height < 20:
+        return False
+    if fill_ratio >= 0.38:
+        return False
+
+    row_counts = Counter(point[1] for point in component)
+    col_counts = Counter(point[0] for point in component)
+    dominant_row, row_count = row_counts.most_common(1)[0]
+    dominant_col, col_count = col_counts.most_common(1)[0]
+    if row_count < bbox.width * 0.55:
+        return False
+    if col_count < bbox.height * 0.55:
+        return False
+    return True
+
+
+def _polyline_points(component: list[tuple[int, int]], bbox: BoundingBox) -> list[list[int]]:
+    row_counts = Counter(point[1] for point in component)
+    col_counts = Counter(point[0] for point in component)
+    dominant_row, _ = row_counts.most_common(1)[0]
+    dominant_col, _ = col_counts.most_common(1)[0]
+
+    left = _boundary_point(component, side="left")
+    right = _boundary_point(component, side="right")
+    top = _boundary_point(component, side="top")
+    bottom = _boundary_point(component, side="bottom")
+
+    if left and right and left[1] != right[1]:
+        points = [list(left)]
+        if left[0] != dominant_col:
+            points.append([dominant_col, left[1]])
+        if left[1] != right[1]:
+            points.append([dominant_col, right[1]])
+        points.append(list(right))
+        return _dedupe_points(points)
+
+    if top and bottom and top[0] != bottom[0]:
+        points = [list(top)]
+        if top[1] != dominant_row:
+            points.append([top[0], dominant_row])
+        if top[0] != bottom[0]:
+            points.append([bottom[0], dominant_row])
+        points.append(list(bottom))
+        return _dedupe_points(points)
+
+    xs_on_row = sorted(point[0] for point in component if abs(point[1] - dominant_row) <= 1)
+    ys_on_col = sorted(point[1] for point in component if abs(point[0] - dominant_col) <= 1)
+    candidates = [
+        [xs_on_row[0], dominant_row],
+        [xs_on_row[-1], dominant_row],
+        [dominant_col, ys_on_col[0]],
+        [dominant_col, ys_on_col[-1]],
+    ]
+    start, end = _farthest_pair(candidates)
+    bend = [dominant_col, dominant_row]
+    if start[0] == end[0] or start[1] == end[1]:
+        return [start, end]
+    if start == bend or end == bend:
+        return [start, end]
+    return [start, bend, end]
+
+
+def _farthest_pair(points: list[list[int]]) -> tuple[list[int], list[int]]:
+    best_pair = (points[0], points[1])
+    best_distance = -1
+    for index, point in enumerate(points):
+        for other in points[index + 1:]:
+            distance = abs(point[0] - other[0]) + abs(point[1] - other[1])
+            if distance > best_distance:
+                best_distance = distance
+                best_pair = (point, other)
+    return best_pair
+
+
+def _boundary_point(component: list[tuple[int, int]], side: str) -> tuple[int, int] | None:
+    if not component:
+        return None
+    if side == "left":
+        edge = min(point[0] for point in component)
+        ys = sorted(point[1] for point in component if point[0] <= edge + 1)
+        return (edge, ys[len(ys) // 2]) if ys else None
+    if side == "right":
+        edge = max(point[0] for point in component)
+        ys = sorted(point[1] for point in component if point[0] >= edge - 1)
+        return (edge, ys[len(ys) // 2]) if ys else None
+    if side == "top":
+        edge = min(point[1] for point in component)
+        xs = sorted(point[0] for point in component if point[1] <= edge + 1)
+        return (xs[len(xs) // 2], edge) if xs else None
+    edge = max(point[1] for point in component)
+    xs = sorted(point[0] for point in component if point[1] >= edge - 1)
+    return (xs[len(xs) // 2], edge) if xs else None
+
+
+def _dedupe_points(points: list[list[int]]) -> list[list[int]]:
+    deduped: list[list[int]] = []
+    for point in points:
+        if deduped and deduped[-1] == point:
+            continue
+        deduped.append(point)
+    return deduped
 
 
 def _arrow_direction(component: list[tuple[int, int]], bbox: BoundingBox) -> str:

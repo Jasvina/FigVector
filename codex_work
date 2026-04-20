@@ -169,3 +169,59 @@
 3. 为真实 `Nano Banana` PNG 建立一个小型评测集，而不是只依赖 synthetic demo。
 4. 设计 draw.io 导出格式，开始验证“可继续编辑”这件事在真实工具链中的表现。
 5. 每次新增功能后，继续把计划、执行、结果、验证、下一步追加到本文件。
+
+---
+
+## 2026年04月21日00时31分
+### 做了什么
+- 按用户选定的 1 / 2 / 3 继续推进仓库，不中断地完成以下增量：
+  - 新增 `src/figvector/ocr.py`，实现可插拔 OCR adapter；
+  - 新增 `src/figvector/export_drawio.py`，实现 draw.io XML 导出；
+  - 新增 `src/figvector/dataset.py`，实现真实 `Nano Banana` PNG 样例集脚手架与批处理入口；
+  - 扩展 `src/figvector/analysis.py`，加入 `polyline` 检测与折线点恢复；
+  - 扩展 `src/figvector/relations.py`，让折线也能恢复连接关系，并把 OCR 文本挂到最近对象上；
+  - 扩展 `src/figvector/pipeline.py`，支持 OCR、draw.io 导出、text block 注入 scene graph；
+  - 扩展 `src/figvector/cli.py`，增加 `--drawio-output`、`--ocr-backend`、`--ocr-sidecar`、`dataset-init`、`dataset-run`；
+  - 扩展 `src/figvector/demo.py`，生成 OCR sidecar、draw.io 文件，并把 demo 升级为包含折线与文本关系的样例；
+  - 更新 `README.md`，把新能力、命令、目录结构、路线图同步到文档；
+  - 创建 `datasets/nano_banana/` 真实样例集工作区。
+
+### 取得的效果
+- 仓库现在已经不只是 `PNG -> SVG` 原型，而是一个更完整的 **scene graph reconstruction playground**：
+  - 能输出 `SVG`；
+  - 能输出 `draw.io`；
+  - 能通过 OCR sidecar / Tesseract CLI 注入文字；
+  - 能把文字与对象建立 `labels` 关系；
+  - 能识别简单折线并恢复折线路径点；
+  - 能批量跑真实样例集目录，而不只是单张 demo。
+- demo 现在包含：
+  - 3 个矩形
+  - 1 个椭圆
+  - 2 个箭头
+  - 1 条折线
+  - 5 个文本块
+  - 多条 `flows_to` / `linked_to` / `labels` 关系
+- `datasets/nano_banana/manifest.json` 现在默认是**空样例清单 + 模板结构**，因此新接手者可以直接往里放真实 PNG，而不会因为仓库自带的无效占位样例导致批处理报错。
+
+### 验证
+- 运行 `PYTHONPATH=src python3 -m figvector demo --output-dir examples/demo`
+- 运行 `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 运行 `PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json`
+- 当前验证结果：
+  - `4 tests OK`
+  - demo 成功生成 `demo-input.ocr.json`、`demo-output.svg`、`demo-output.drawio`、`demo-report.json`
+  - 空样例集批处理返回 `[]`，行为正确且不报错
+
+### 当前结论
+- 用户要求的 1 / 2 / 3 已完成到一个可提交、可演示、可继续扩展的版本：
+  1. 有真实样例集脚手架；
+  2. 有 OCR 接口层；
+  3. 有折线增强与 draw.io 导出。
+- 当前仓库已经从“最小图元恢复器”演进为“带文本、关系和多导出的科研图结构化重建工具雏形”。
+
+### 下一步计划
+1. 用真实 `Nano Banana` PNG 填充 `datasets/nano_banana/inbox/`，建立第一批人工评测样例。
+2. 为真实样例增加 `expected.md` / 标注规范，开始做轻量 benchmark。
+3. 提升 polyline / curved-arrow 识别，不只覆盖简单单折线。
+4. 给 draw.io 导出补更细的样式和分组信息。
+5. 如果要继续冲产品化，下一阶段优先做一个本地 Web demo。

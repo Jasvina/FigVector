@@ -1,0 +1,54 @@
+{
+  "texts": [
+    {
+      "text": "Prompt",
+      "bbox": {
+        "x": 100,
+        "y": 130,
+        "width": 90,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Encoder",
+      "bbox": {
+        "x": 340,
+        "y": 130,
+        "width": 100,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Output",
+      "bbox": {
+        "x": 575,
+        "y": 130,
+        "width": 90,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Signal",
+      "bbox": {
+        "x": 347,
+        "y": 293,
+        "width": 75,
+        "height": 24
+      },
+      "confidence": 0.98
+    },
+    {
+      "text": "Editable",
+      "bbox": {
+        "x": 600,
+        "y": 337,
+        "width": 90,
+        "height": 24
+      },
+      "confidence": 0.98
+    }
+  ]
+}

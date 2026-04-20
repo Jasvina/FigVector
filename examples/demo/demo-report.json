@@ -157,8 +157,8 @@
       "bbox": {
         "x": 324,
         "y": 245,
-        "width": 113,
-        "height": 111
+        "width": 112,
+        "height": 112
       },
       "color": [
         122,
@@ -168,11 +168,54 @@
       ],
       "confidence": 0.67,
       "metadata": {
-        "area": 9783,
-        "fill_ratio": 0.78,
-        "bbox_area": 12543,
+        "area": 9826,
+        "fill_ratio": 0.783,
+        "bbox_area": 12544,
         "bucket": "rgb(120, 168, 240)",
         "id": "primitive-7"
+      }
+    },
+    {
+      "kind": "polyline",
+      "bbox": {
+        "x": 434,
+        "y": 297,
+        "width": 156,
+        "height": 57
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.76,
+      "metadata": {
+        "area": 1422,
+        "fill_ratio": 0.16,
+        "points": [
+          [
+            434,
+            300
+          ],
+          [
+            500,
+            300
+          ],
+          [
+            500,
+            350
+          ],
+          [
+            589,
+            350
+          ]
+        ],
+        "bbox_area": 8892,
+        "bucket": "rgb(24, 48, 48)",
+        "id": "primitive-8",
+        "connects_from": "primitive-7",
+        "connects_to": "primitive-9"
       }
     },
     {
@@ -195,32 +238,84 @@
         "fill_ratio": 0.974,
         "bbox_area": 7000,
         "bucket": "rgb(240, 216, 120)",
-        "id": "primitive-8"
+        "id": "primitive-9"
+      }
+    }
+  ],
+  "texts": [
+    {
+      "text": "Prompt",
+      "bbox": {
+        "x": 100,
+        "y": 130,
+        "width": 90,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-1",
+        "label_for": "primitive-1"
       }
     },
     {
-      "kind": "line",
+      "text": "Encoder",
       "bbox": {
-        "x": 377,
-        "y": 353,
-        "width": 213,
-        "height": 7
+        "x": 340,
+        "y": 130,
+        "width": 100,
+        "height": 24
       },
-      "color": [
-        46,
-        50,
-        71,
-        255
-      ],
-      "confidence": 0.82,
+      "confidence": 0.99,
+      "source": "sidecar-json",
       "metadata": {
-        "area": 1481,
-        "fill_ratio": 0.993,
-        "bbox_area": 1491,
-        "bucket": "rgb(24, 48, 48)",
-        "id": "primitive-9",
-        "connects_from": "primitive-7",
-        "connects_to": "primitive-8"
+        "id": "text-2",
+        "label_for": "primitive-2"
+      }
+    },
+    {
+      "text": "Output",
+      "bbox": {
+        "x": 575,
+        "y": 130,
+        "width": 90,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-3",
+        "label_for": "primitive-3"
+      }
+    },
+    {
+      "text": "Signal",
+      "bbox": {
+        "x": 347,
+        "y": 293,
+        "width": 75,
+        "height": 24
+      },
+      "confidence": 0.98,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-4",
+        "label_for": "primitive-7"
+      }
+    },
+    {
+      "text": "Editable",
+      "bbox": {
+        "x": 600,
+        "y": 337,
+        "width": 90,
+        "height": 24
+      },
+      "confidence": 0.98,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-5",
+        "label_for": "primitive-9"
       }
     }
   ],
@@ -239,9 +334,39 @@
     },
     {
       "source_id": "primitive-7",
-      "target_id": "primitive-8",
+      "target_id": "primitive-9",
       "kind": "linked_to",
-      "confidence": 0.82
+      "confidence": 0.75
+    },
+    {
+      "source_id": "text-1",
+      "target_id": "primitive-1",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-2",
+      "target_id": "primitive-2",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-3",
+      "target_id": "primitive-3",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-4",
+      "target_id": "primitive-7",
+      "kind": "labels",
+      "confidence": 0.98
+    },
+    {
+      "source_id": "text-5",
+      "target_id": "primitive-9",
+      "kind": "labels",
+      "confidence": 0.98
     }
   ]
 }

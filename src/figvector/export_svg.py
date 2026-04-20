@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from xml.sax.saxutils import escape
 
-from .models import Primitive, SceneGraph
+from .models import Primitive, SceneGraph, TextBlock
 
 
 def export_svg(scene: SceneGraph) -> str:
@@ -18,6 +18,8 @@ def export_svg(scene: SceneGraph) -> str:
 
     for index, primitive in enumerate(scene.primitives, start=1):
         lines.extend(_primitive_to_svg(index, primitive))
+    for index, text_block in enumerate(scene.texts, start=1):
+        lines.extend(_text_to_svg(index, text_block))
 
     lines.append("</svg>")
     return "\n".join(lines)
@@ -63,8 +65,34 @@ def _primitive_to_svg(index: int, primitive: Primitive) -> list[str]:
         return [
             f'  <line {common} x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{stroke}" stroke-width="{stroke_width}" stroke-linecap="round" marker-end="url(#arrowhead)" />'
         ]
+    if primitive.kind == "polyline":
+        points = primitive.metadata.get("points", [])
+        if isinstance(points, list) and len(points) >= 2:
+            stroke_width = max(2, min(bbox.width, bbox.height) // 3)
+            encoded = " ".join(f"{point[0]},{point[1]}" for point in points)
+            return [
+                f'  <polyline {common} points="{encoded}" stroke="{stroke}" stroke-width="{stroke_width}" stroke-linecap="round" stroke-linejoin="round" fill="none" />'
+            ]
     return [
         f'  <rect {common} x="{bbox.x}" y="{bbox.y}" width="{bbox.width}" height="{bbox.height}" fill="none" stroke="{stroke}" stroke-width="2" stroke-dasharray="8 6" />'
+    ]
+
+
+def _text_to_svg(index: int, text_block: TextBlock) -> list[str]:
+    bbox = text_block.bbox
+    text_id = str(text_block.metadata.get("id", f"text-{index}"))
+    attrs = [
+        f'id="{text_id}"',
+        'data-figvector-kind="text"',
+        f'data-figvector-confidence="{text_block.confidence:.2f}"',
+        f'data-figvector-source="{escape(text_block.source)}"',
+    ]
+    if "label_for" in text_block.metadata:
+        attrs.append(f'data-figvector-label-for="{escape(str(text_block.metadata["label_for"]))}"')
+    font_size = max(12, min(24, bbox.height))
+    baseline = bbox.y + max(font_size, bbox.height - 2)
+    return [
+        f'  <text {" ".join(attrs)} x="{bbox.x}" y="{baseline}" fill="rgb(46, 50, 71)" font-size="{font_size}" font-family="Helvetica, Arial, sans-serif">{escape(text_block.text)}</text>'
     ]
 
 

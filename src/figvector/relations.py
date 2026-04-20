@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from math import dist
 
-from .models import Primitive, Relation, SceneGraph
+from .models import Primitive, Relation, SceneGraph, TextBlock
 
 
-CONNECTOR_KINDS = {"line", "arrow"}
+CONNECTOR_KINDS = {"line", "arrow", "polyline"}
 SHAPE_KINDS = {"rectangle", "ellipse", "region"}
 
 
@@ -44,11 +44,19 @@ def infer_relations(scene: SceneGraph, max_distance: float = 48.0) -> list[Relat
             )
         )
 
+    relations.extend(infer_text_relations(scene, shapes))
     return relations
 
 
 def connector_endpoints(primitive: Primitive) -> tuple[tuple[float, float], tuple[float, float]]:
     bbox = primitive.bbox
+    if primitive.kind == "polyline":
+        points = primitive.metadata.get("points", [])
+        if isinstance(points, list) and len(points) >= 2:
+            start = points[0]
+            end = points[-1]
+            return (float(start[0]), float(start[1])), (float(end[0]), float(end[1]))
+
     if primitive.kind == "arrow":
         direction = str(primitive.metadata.get("direction", "right"))
         if direction == "left":
@@ -87,3 +95,35 @@ def _distance_to_bbox(point: tuple[float, float], primitive: Primitive) -> float
     clamped_x = min(max(x, bbox.x), bbox.x2)
     clamped_y = min(max(y, bbox.y), bbox.y2)
     return dist((x, y), (clamped_x, clamped_y))
+
+
+def infer_text_relations(scene: SceneGraph, shapes: list[Primitive], max_distance: float = 72.0) -> list[Relation]:
+    relations: list[Relation] = []
+    for text_block in scene.texts:
+        target, target_distance = _nearest_shape_for_text(shapes, text_block)
+        if target is None or target_distance > max_distance:
+            continue
+        text_id = str(text_block.metadata["id"])
+        target_id = str(target.metadata["id"])
+        text_block.metadata["label_for"] = target_id
+        relations.append(
+            Relation(
+                source_id=text_id,
+                target_id=target_id,
+                kind="labels",
+                confidence=round(max(0.35, text_block.confidence - (target_distance / 160.0)), 2),
+            )
+        )
+    return relations
+
+
+def _nearest_shape_for_text(shapes: list[Primitive], text_block: TextBlock) -> tuple[Primitive | None, float]:
+    center = text_block.bbox.center
+    best_primitive = None
+    best_distance = float("inf")
+    for primitive in shapes:
+        candidate = _distance_to_bbox(center, primitive)
+        if candidate < best_distance:
+            best_primitive = primitive
+            best_distance = candidate
+    return best_primitive, best_distance

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Any, Iterable
 
 Pixel = tuple[int, int, int, int]
 
@@ -47,7 +47,16 @@ class Primitive:
     bbox: BoundingBox
     color: Pixel
     confidence: float
-    metadata: dict[str, str | float | int] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class TextBlock:
+    text: str
+    bbox: BoundingBox
+    confidence: float
+    source: str
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -64,6 +73,7 @@ class SceneGraph:
     height: int
     background: Pixel
     primitives: list[Primitive] = field(default_factory=list)
+    texts: list[TextBlock] = field(default_factory=list)
     relations: list[Relation] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -85,6 +95,21 @@ class SceneGraph:
                     "metadata": primitive.metadata,
                 }
                 for primitive in self.primitives
+            ],
+            "texts": [
+                {
+                    "text": text_block.text,
+                    "bbox": {
+                        "x": text_block.bbox.x,
+                        "y": text_block.bbox.y,
+                        "width": text_block.bbox.width,
+                        "height": text_block.bbox.height,
+                    },
+                    "confidence": text_block.confidence,
+                    "source": text_block.source,
+                    "metadata": text_block.metadata,
+                }
+                for text_block in self.texts
             ],
             "relations": [
                 {
