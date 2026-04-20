@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from figvector.dataset import create_dataset_scaffold, run_dataset
+from figvector.dataset import create_dataset_scaffold, evaluate_dataset, run_dataset
 from figvector.demo import build_demo_assets
 from figvector.ocr import OCRConfig
 from figvector.pipeline import vectorize_png
@@ -65,6 +65,13 @@ class PipelineSmokeTests(unittest.TestCase):
                         "png": str(demo["png"].relative_to(root)),
                         "ocr_sidecar": str(demo["ocr"].relative_to(root)),
                         "notes": "seed sample",
+                        "expected": {
+                            "min_primitives": 6,
+                            "min_texts": 5,
+                            "primitive_counts": {"rectangle": 4, "ellipse": 1, "arrow": 2, "polyline": 1},
+                            "relation_counts": {"flows_to": 2, "labels": 5, "linked_to": 1},
+                            "required_texts": ["Prompt", "Encoder", "Output"],
+                        },
                     }
                 ],
             }
@@ -73,6 +80,12 @@ class PipelineSmokeTests(unittest.TestCase):
             self.assertEqual(1, len(results))
             self.assertTrue((root / "outputs" / "sample-001" / "output.svg").exists())
             self.assertTrue((root / "outputs" / "summary.json").exists())
+            self.assertTrue(results[0]["evaluation"]["passed"])
+
+            evaluations = evaluate_dataset(root)
+            self.assertEqual(1, len(evaluations))
+            self.assertTrue(evaluations[0]["evaluation"]["passed"])
+            self.assertTrue((root / "outputs" / "evaluation-summary.json").exists())
 
 
 if __name__ == "__main__":

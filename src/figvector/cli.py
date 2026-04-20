@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .dataset import create_dataset_scaffold, run_dataset
+from .dataset import create_dataset_scaffold, evaluate_dataset, run_dataset
 from .demo import build_demo_assets
 from .ocr import OCRConfig
 from .pipeline import vectorize_png
@@ -34,6 +34,10 @@ def build_parser() -> argparse.ArgumentParser:
     dataset_run.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
     dataset_run.add_argument("--output-dir", help="Optional output directory override.")
     dataset_run.add_argument("--ocr-backend", default="none", choices=["none", "sidecar-json", "tesseract-cli"], help="OCR backend for dataset processing.")
+
+    dataset_eval = subparsers.add_parser("dataset-eval", help="Evaluate existing dataset outputs against lightweight expectations.")
+    dataset_eval.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
+    dataset_eval.add_argument("--output-dir", help="Optional output directory override.")
 
     return parser
 
@@ -72,6 +76,11 @@ def main(argv: list[str] | None = None) -> int:
         result = create_dataset_scaffold(args.root)
         print(f"Wrote dataset scaffold to {Path(result['root']).resolve()}")
         print(f"Manifest: {Path(result['manifest']).resolve()}")
+        return 0
+
+    if args.command == "dataset-eval":
+        result = evaluate_dataset(args.root, output_dir=args.output_dir)
+        print(json.dumps(result, indent=2))
         return 0
 
     result = run_dataset(args.root, output_dir=args.output_dir, ocr_backend=args.ocr_backend)

@@ -225,3 +225,46 @@
 3. 提升 polyline / curved-arrow 识别，不只覆盖简单单折线。
 4. 给 draw.io 导出补更细的样式和分组信息。
 5. 如果要继续冲产品化，下一阶段优先做一个本地 Web demo。
+
+---
+
+## 2026年04月21日00时42分
+### 做了什么
+- 在真实样例集脚手架之上继续推进“可评测”能力：
+  - 新增 `src/figvector/eval.py`，实现 lightweight scene-graph evaluation；
+  - 扩展 `src/figvector/dataset.py`，让 `dataset-run` 在生成产物时可以附带 evaluation 摘要；
+  - 新增 `dataset-eval` CLI，用于对已有 `report.json` 批量做预期校验；
+  - 扩展 `datasets/nano_banana/manifest.json` 的 `sample_template`，加入 `expected` 示例；
+  - 更新 `datasets/nano_banana/README.md`，补充如何写 `expected` 与如何运行 `dataset-eval`；
+  - 更新 `README.md`，把 lightweight evaluation 同步进功能说明、命令示例、目录结构与路线图；
+  - 扩展 `tests/test_pipeline.py`，让 dataset scaffold 的自动化测试覆盖 `expected`、`run_dataset` 与 `evaluate_dataset`。
+
+### 取得的效果
+- FigVector 现在不仅能批量处理真实 PNG 样例，还能对这些结果做**轻量 benchmark**：
+  - 对 primitive 数量做检查；
+  - 对 relation 数量做检查；
+  - 对必需文本做检查；
+  - 对最小 primitive / text 数做检查。
+- 这使仓库从“可以批量跑”进一步变成“可以持续对比迭代效果”，对后续真实样例驱动开发非常关键。
+
+### 验证
+- 运行 `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 运行 `PYTHONPATH=src python3 -m figvector demo --output-dir examples/demo`
+- 运行 `PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json`
+- 运行 `PYTHONPATH=src python3 -m figvector dataset-eval datasets/nano_banana`
+- 当前结果：
+  - `4 tests OK`
+  - demo 生成正常
+  - 空真实样例集的 `dataset-run` / `dataset-eval` 都返回 `[]`，行为正确，不会阻塞后续接手者
+
+### 当前结论
+- 当前仓库已经具备三层能力：
+  1. 单图结构化重建；
+  2. 真实样例集批处理；
+  3. 基于 expected 规则的轻量评测。
+- 这意味着下一阶段真正的瓶颈已经不再是“基础工程不完整”，而是“拿真实 Nano Banana PNG 来不断逼近好结果”。
+
+### 下一步计划
+1. 收集第一批真实 `Nano Banana` PNG 到 `datasets/nano_banana/inbox/`。
+2. 给每个真实样例补 `expected`，形成第一版 benchmark 集。
+3. 针对 benchmark 中失败最多的类型，优先增强 curved arrow、multi-bend polyline、grouping 和文字归属。

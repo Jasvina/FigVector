@@ -31,6 +31,7 @@
 - 对箭头/连线做首版关系恢复，推断 `connects_from` / `connects_to`；
 - 提供可插拔 OCR adapter，当前支持 `none` / `sidecar-json` / `tesseract-cli`；
 - 提供真实 `Nano Banana` PNG 样例集脚手架，方便把 repo 从 synthetic demo 推向真实评测；
+- 支持 lightweight dataset evaluation，可用 `expected` 规则检查 primitive / relation / text 是否大致命中；
 - 额外导出结构化 `JSON report`，为后续更强的 scene graph 打底；
 - 生成一套可复现的 demo 输入/输出，方便我们持续迭代。
 
@@ -130,7 +131,13 @@ PYTHONPATH=src python3 -m figvector dataset-init datasets/nano_banana
 PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json
 ```
 
-### 5. Run tests
+### 5. Evaluate dataset outputs
+
+```bash
+PYTHONPATH=src python3 -m figvector dataset-eval datasets/nano_banana
+```
+
+### 6. Run tests
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests
@@ -162,6 +169,7 @@ FigVector/
 │   ├── cli.py
 │   ├── dataset.py
 │   ├── demo.py
+│   ├── eval.py
 │   ├── export_drawio.py
 │   ├── export_svg.py
 │   ├── models.py
@@ -184,6 +192,7 @@ FigVector/
 - [x] Baseline relation recovery
 - [x] OCR adapter layer
 - [x] Real-sample dataset scaffold
+- [x] Lightweight dataset evaluation
 - [x] Demo assets and smoke tests
 - [ ] Primitive relationships (`contains_label`, `group_with`, richer flow semantics)
 

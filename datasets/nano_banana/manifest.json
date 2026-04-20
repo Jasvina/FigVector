@@ -5,13 +5,28 @@
     "id": "stable sample id",
     "png": "path relative to this manifest",
     "ocr_sidecar": "optional OCR sidecar JSON path",
-    "notes": "freeform expectations"
+    "notes": "freeform expectations",
+    "expected": "optional lightweight benchmark expectations"
   },
   "samples": [],
   "sample_template": {
     "id": "replace-with-real-sample",
     "png": "inbox/replace-with-real-sample.png",
     "ocr_sidecar": "ocr_sidecars/replace-with-real-sample.ocr.json",
-    "notes": "Describe the figure, expected objects, and hard parts here."
+    "notes": "Describe the figure, expected objects, and hard parts here.",
+    "expected": {
+      "min_primitives": 4,
+      "min_texts": 2,
+      "primitive_counts": {
+        "rectangle": 2
+      },
+      "relation_counts": {
+        "flows_to": 1
+      },
+      "required_texts": [
+        "EGFR",
+        "RAS"
+      ]
+    }
   }
 }
