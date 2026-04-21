@@ -10,6 +10,10 @@
   <sub>Poster source: <code>docs/assets/figvector-poster.svg</code> · Design philosophy: <code>docs/design/figvector-poster-philosophy.md</code></sub>
 </p>
 
+## Project status
+
+For the current implementation status, verification notes, and future optimization plan, see [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md).
+
 ## Why FigVector
 
 科研工作流里最痛的一件事，是图已经生成出来了，但后续又要改：
