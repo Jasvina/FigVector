@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .analysis import RasterAnalyzer
+from .config import resolve_profile
 from .export_drawio import export_drawio
 from .export_svg import export_svg
 from .models import SceneGraph
@@ -17,12 +18,24 @@ def vectorize_png(
     output_path: str | Path,
     report_path: str | Path | None = None,
     drawio_path: str | Path | None = None,
-    background_threshold: int = 38,
-    min_area: int = 32,
+    profile: str = "real",
+    background_threshold: int | None = None,
+    min_area: int | None = None,
+    color_quantization: int | None = None,
     ocr: OCRConfig | None = None,
 ) -> SceneGraph:
+    resolved = resolve_profile(
+        profile,
+        background_threshold=background_threshold,
+        min_area=min_area,
+        color_quantization=color_quantization,
+    )
     image = read_png(input_path)
-    analyzer = RasterAnalyzer(background_threshold=background_threshold, min_area=min_area)
+    analyzer = RasterAnalyzer(
+        background_threshold=resolved.background_threshold,
+        min_area=resolved.min_area,
+        color_quantization=resolved.color_quantization,
+    )
     background, primitives = analyzer.detect_primitives(image)
     scene = SceneGraph(width=image.width, height=image.height, background=background, primitives=primitives)
     for index, primitive in enumerate(scene.primitives, start=1):

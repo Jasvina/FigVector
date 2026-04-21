@@ -268,3 +268,51 @@
 1. 收集第一批真实 `Nano Banana` PNG 到 `datasets/nano_banana/inbox/`。
 2. 给每个真实样例补 `expected`，形成第一版 benchmark 集。
 3. 针对 benchmark 中失败最多的类型，优先增强 curved arrow、multi-bend polyline、grouping 和文字归属。
+
+---
+
+## 2026年04月21日09时39分
+### 做了什么
+- 继续把仓库推进到“真实样例驱动的精度优化阶段”的下一层：
+  - 新增 `src/figvector/config.py`，把启发式参数整理成 `synthetic` / `real` profile；
+  - 扩展 `src/figvector/pipeline.py`，允许通过 profile 或显式参数切换分析配置；
+  - 重写 `src/figvector/dataset.py` 的工作流，加入：
+    - `dataset-register`：自动把 `inbox/` 下的 PNG 注册进 manifest；
+    - `dataset-run`：输出 `summary.json` 和 `report.md`；
+    - `dataset-eval`：输出 `evaluation-summary.json` 和 `evaluation-report.md`；
+    - `dataset-optimize`：对多个 profile 做 sweep，并输出 `optimization-summary.json` 和 `optimization-report.md`；
+  - 扩展 `src/figvector/cli.py`，把真实样例 intake、profile sweep 和评测命令全部暴露成 CLI；
+  - 更新 `README.md` 与 `datasets/nano_banana/README.md`，把新的 intake / report / optimize 工作流写清楚；
+  - 更新 `tests/test_pipeline.py`，让测试覆盖 `dataset-register`、`dataset-run`、`dataset-eval`、`dataset-optimize` 的整条闭环。
+
+### 取得的效果
+- 现在这个仓库已经不仅仅是“有一个样例集目录”，而是已经具备了完整的**真实样例优化循环**：
+  1. 把真实 PNG 放进 `inbox/`
+  2. 自动注册进 manifest
+  3. 批量运行结构化重建
+  4. 用 expected 规则评测结果
+  5. 比较不同 analysis profile 的得分
+  6. 通过 markdown 报告快速查看误差摘要
+- 这使 FigVector 从“能处理真实样例”进一步变成“可以围绕真实样例持续做精度优化”的仓库。
+
+### 验证
+- 运行 `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 当前结果：`4 tests OK`
+- 测试已覆盖：
+  - demo 生成
+  - 单图 SVG / draw.io / report 导出
+  - dataset scaffold
+  - inbox 注册
+  - batch run
+  - dataset eval
+  - profile optimize
+
+### 当前结论
+- 现在仓库真正缺的已经不是基础工程，而是**真实 Nano Banana PNG 数据本身**。
+- 一旦往 `datasets/nano_banana/inbox/` 放入第一批真实样例，当前这套工具链就可以马上开始做 benchmark-driven refinement。
+
+### 下一步计划
+1. 导入第一批真实 `Nano Banana` PNG。
+2. 为每个样例补 sidecar 和 expected。
+3. 跑 `dataset-optimize` 找出更好的 profile / 参数组合。
+4. 针对失败样例集中暴露的问题，继续增强 arrow、polyline、text attachment 和 grouping。

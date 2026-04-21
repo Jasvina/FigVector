@@ -32,6 +32,7 @@
 - 提供可插拔 OCR adapter，当前支持 `none` / `sidecar-json` / `tesseract-cli`；
 - 提供真实 `Nano Banana` PNG 样例集脚手架，方便把 repo 从 synthetic demo 推向真实评测；
 - 支持 lightweight dataset evaluation，可用 `expected` 规则检查 primitive / relation / text 是否大致命中；
+- 支持 `dataset-register` / `dataset-optimize`，把真实样例 intake、profile sweep 和误差摘要放进同一条工作流；
 - 额外导出结构化 `JSON report`，为后续更强的 scene graph 打底；
 - 生成一套可复现的 demo 输入/输出，方便我们持续迭代。
 
@@ -64,6 +65,8 @@
 - OCR sidecar / Tesseract CLI 接口
 - JSON scene report
 - 真实样例集脚手架
+- 数据集级别的轻量 benchmark 与 profile sweep
+- `synthetic` / `real` 两套 analysis profile，可做启发式对比
 
 ### Not in scope yet
 
@@ -128,16 +131,34 @@ PYTHONPATH=src python3 -m figvector dataset-init datasets/nano_banana
 ### 4. Batch-run the real-sample scaffold
 
 ```bash
-PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json
+PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json --profile real
 ```
 
-### 5. Evaluate dataset outputs
+### 5. Register inbox PNGs into the manifest
+
+```bash
+PYTHONPATH=src python3 -m figvector dataset-register datasets/nano_banana
+```
+
+### 6. Evaluate dataset outputs
 
 ```bash
 PYTHONPATH=src python3 -m figvector dataset-eval datasets/nano_banana
 ```
 
-### 6. Run tests
+### 7. Sweep profiles on the dataset
+
+```bash
+PYTHONPATH=src python3 -m figvector dataset-optimize datasets/nano_banana --ocr-backend sidecar-json --profiles synthetic real
+```
+
+这会在 `datasets/nano_banana/outputs/` 下生成：
+
+- `summary.json` / `report.md`
+- `evaluation-summary.json` / `evaluation-report.md`
+- `optimization-summary.json` / `optimization-report.md`
+
+### 8. Run tests
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests
@@ -170,6 +191,7 @@ FigVector/
 │   ├── dataset.py
 │   ├── demo.py
 │   ├── eval.py
+│   ├── config.py
 │   ├── export_drawio.py
 │   ├── export_svg.py
 │   ├── models.py
@@ -193,6 +215,7 @@ FigVector/
 - [x] OCR adapter layer
 - [x] Real-sample dataset scaffold
 - [x] Lightweight dataset evaluation
+- [x] Dataset intake + profile sweep tooling
 - [x] Demo assets and smoke tests
 - [ ] Primitive relationships (`contains_label`, `group_with`, richer flow semantics)
 

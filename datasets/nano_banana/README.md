@@ -5,7 +5,8 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
 ## How to use it
 
 1. Put real PNG files in `inbox/`.
-2. Optionally create OCR sidecars in `ocr_sidecars/` using the format:
+2. Run `figvector dataset-register datasets/nano_banana` to register new PNGs into the manifest and create empty OCR sidecars.
+3. Fill OCR sidecars in `ocr_sidecars/` using the format:
    ```json
    {
      "texts": [
@@ -17,19 +18,10 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
      ]
    }
    ```
-3. Register each sample in `manifest.json`.
-4. If you want a lightweight benchmark, add an `expected` block like:
-   ```json
-   {
-     "min_primitives": 6,
-     "min_texts": 4,
-     "primitive_counts": {"rectangle": 3, "arrow": 2},
-     "relation_counts": {"flows_to": 2, "labels": 4},
-     "required_texts": ["EGFR", "RAS"]
-   }
-   ```
-5. Run `figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json`.
-6. Inspect `outputs/<sample-id>/` for SVG, draw.io, and JSON outputs.
+4. Optionally add an `expected` block per sample in `manifest.json` for lightweight benchmark checks.
+5. Run `figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json --profile real`.
+6. Inspect `outputs/<sample-id>/`, `outputs/report.md`, and `outputs/evaluation-report.md` for generated artifacts and summaries.
 7. Run `figvector dataset-eval datasets/nano_banana` to compare generated scene graphs against the expected checks.
+8. Run `figvector dataset-optimize datasets/nano_banana --ocr-backend sidecar-json --profiles synthetic real` to compare analysis profiles on the same dataset.
 
 This scaffold exists so the repo can grow from a synthetic demo toward a real evaluation set without guessing hidden file layouts each time.

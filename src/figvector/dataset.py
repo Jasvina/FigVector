@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from .eval import evaluate_scene
 from .ocr import OCRConfig
@@ -48,11 +50,55 @@ def create_dataset_scaffold(root: str | Path) -> dict[str, Path]:
     }
 
 
+def register_inbox_samples(root: str | Path, *, create_sidecars: bool = True) -> list[dict[str, object]]:
+    root = Path(root)
+    create_dataset_scaffold(root)
+    manifest_path = root / "manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    samples = list(payload.get("samples", []))
+    template = payload.get("sample_template", {})
+    existing_pngs = {item.get("png") for item in samples}
+    existing_ids = {item.get("id") for item in samples}
+
+    additions: list[dict[str, object]] = []
+    for png_path in sorted((root / "inbox").glob("*.png")):
+        relative_png = str(png_path.relative_to(root))
+        if relative_png in existing_pngs:
+            continue
+
+        sample_id = _unique_sample_id(_slugify(png_path.stem), existing_ids)
+        entry = {
+            "id": sample_id,
+            "png": relative_png,
+            "ocr_sidecar": str((root / "ocr_sidecars" / f"{sample_id}.ocr.json").relative_to(root)),
+            "notes": "",
+            "expected": json.loads(json.dumps(template.get("expected", {}))),
+        }
+        if not entry["expected"]:
+            entry.pop("expected")
+        if create_sidecars:
+            sidecar_path = root / entry["ocr_sidecar"]
+            if not sidecar_path.exists():
+                sidecar_path.write_text(json.dumps({"texts": []}, indent=2), encoding="utf-8")
+        samples.append(entry)
+        additions.append(entry)
+        existing_ids.add(sample_id)
+        existing_pngs.add(relative_png)
+
+    payload["samples"] = samples
+    manifest_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return additions
+
+
 def run_dataset(
     root: str | Path,
     *,
     output_dir: str | Path | None = None,
     ocr_backend: str = "none",
+    profile: str = "real",
+    background_threshold: int | None = None,
+    min_area: int | None = None,
+    color_quantization: int | None = None,
 ) -> list[dict[str, object]]:
     root = Path(root)
     manifest = _load_manifest(root / "manifest.json")
@@ -70,6 +116,10 @@ def run_dataset(
             svg_path,
             report_path=report_path,
             drawio_path=drawio_path,
+            profile=profile,
+            background_threshold=background_threshold,
+            min_area=min_area,
+            color_quantization=color_quantization,
             ocr=OCRConfig(backend=ocr_backend, sidecar_path=str(sample.ocr_sidecar) if sample.ocr_sidecar else None),
         )
         evaluation = evaluate_scene(scene, sample.expected)
@@ -80,32 +130,15 @@ def run_dataset(
                 "svg": str(svg_path),
                 "report": str(report_path),
                 "drawio": str(drawio_path),
+                "profile": profile,
                 "evaluation": evaluation.to_dict() if evaluation is not None else None,
             }
         )
 
     summary_path = destination / "summary.json"
     summary_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
+    _write_markdown_report(destination / "report.md", results, title=f"FigVector dataset run ({profile})")
     return results
-
-
-def _load_manifest(path: Path) -> list[DatasetSample]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    root = path.parent
-    samples: list[DatasetSample] = []
-    for item in payload.get("samples", []):
-        png_path = root / item["png"]
-        sidecar = item.get("ocr_sidecar")
-        samples.append(
-            DatasetSample(
-                sample_id=item["id"],
-                png_path=png_path,
-                ocr_sidecar=(root / sidecar) if sidecar else None,
-                notes=item.get("notes", ""),
-                expected=item.get("expected"),
-            )
-        )
-    return samples
 
 
 def evaluate_dataset(root: str | Path, *, output_dir: str | Path | None = None) -> list[dict[str, object]]:
@@ -155,7 +188,64 @@ def evaluate_dataset(root: str | Path, *, output_dir: str | Path | None = None) 
 
     summary_path = source / "evaluation-summary.json"
     summary_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
+    _write_markdown_report(source / "evaluation-report.md", results, title="FigVector dataset evaluation")
     return results
+
+
+def optimize_dataset(
+    root: str | Path,
+    *,
+    profiles: list[str],
+    ocr_backend: str = "none",
+) -> list[dict[str, object]]:
+    root = Path(root)
+    outputs_root = root / "outputs"
+    outputs_root.mkdir(parents=True, exist_ok=True)
+    leaderboard: list[dict[str, object]] = []
+
+    for profile in profiles:
+        profile_output = outputs_root / profile
+        run_dataset(root, output_dir=profile_output, ocr_backend=ocr_backend, profile=profile)
+        evaluations = evaluate_dataset(root, output_dir=profile_output)
+        valid = [item["evaluation"] for item in evaluations if item.get("evaluation")]
+        if valid:
+            average_score = round(sum(item["score"] for item in valid) / len(valid), 3)
+            pass_rate = round(sum(1 for item in valid if item["passed"]) / len(valid), 3)
+        else:
+            average_score = 0.0
+            pass_rate = 0.0
+        leaderboard.append(
+            {
+                "profile": profile,
+                "samples": len(evaluations),
+                "average_score": average_score,
+                "pass_rate": pass_rate,
+            }
+        )
+
+    leaderboard.sort(key=lambda item: (-item["average_score"], -item["pass_rate"], item["profile"]))
+    (outputs_root / "optimization-summary.json").write_text(json.dumps(leaderboard, indent=2), encoding="utf-8")
+    _write_markdown_report(outputs_root / "optimization-report.md", leaderboard, title="FigVector profile sweep")
+    return leaderboard
+
+
+def _load_manifest(path: Path) -> list[DatasetSample]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    root = path.parent
+    samples: list[DatasetSample] = []
+    for item in payload.get("samples", []):
+        png_path = root / item["png"]
+        sidecar = item.get("ocr_sidecar")
+        samples.append(
+            DatasetSample(
+                sample_id=item["id"],
+                png_path=png_path,
+                ocr_sidecar=(root / sidecar) if sidecar else None,
+                notes=item.get("notes", ""),
+                expected=item.get("expected"),
+            )
+        )
+    return samples
 
 
 def _manifest_template() -> dict[str, object]:
@@ -194,7 +284,8 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
 ## How to use it
 
 1. Put real PNG files in `inbox/`.
-2. Optionally create OCR sidecars in `ocr_sidecars/` using the format:
+2. Run `figvector dataset-register datasets/nano_banana` to register new PNGs into the manifest and create empty OCR sidecars.
+3. Fill OCR sidecars in `ocr_sidecars/` using the format:
    ```json
    {
      \"texts\": [
@@ -206,10 +297,11 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
      ]
    }
    ```
-3. Register each sample in `manifest.json`, and optionally add an `expected` block for lightweight benchmark checks.
-4. Run `figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json`.
-5. Inspect `outputs/<sample-id>/` for SVG, draw.io, and JSON outputs.
-6. Run `figvector dataset-eval datasets/nano_banana` to compare predicted scene graphs against the expected counts/texts you recorded.
+4. Optionally add an `expected` block per sample in `manifest.json` for lightweight benchmark checks.
+5. Run `figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json --profile real`.
+6. Inspect `outputs/<sample-id>/` plus `outputs/report.md` for generated artifacts and per-sample summaries.
+7. Run `figvector dataset-eval datasets/nano_banana` to compare scene graphs against `expected` checks.
+8. Run `figvector dataset-optimize datasets/nano_banana --profiles synthetic real` to compare profile-level scores.
 
 This scaffold exists so the repo can grow from a synthetic demo toward a real evaluation set without guessing hidden file layouts each time.
 """
@@ -286,3 +378,60 @@ def _evaluate_payload(payload: dict[str, object], expected: dict[str, object] | 
         "score": round(passed_count / len(checks), 3),
         "checks": checks,
     }
+
+
+def _slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or "sample"
+
+
+def _unique_sample_id(base: str, existing_ids: set[str]) -> str:
+    candidate = base
+    index = 2
+    while candidate in existing_ids:
+        candidate = f"{base}-{index}"
+        index += 1
+    return candidate
+
+
+def _write_markdown_report(path: Path, items: list[dict[str, object]], *, title: str) -> None:
+    lines = [f"# {title}", ""]
+    if not items:
+        lines.append("No samples were available for this run.")
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return
+
+    if all("average_score" in item for item in items):
+        lines.append("| Profile | Samples | Avg score | Pass rate |")
+        lines.append("| --- | ---: | ---: | ---: |")
+        for item in items:
+            lines.append(
+                f"| `{item['profile']}` | {item['samples']} | {item['average_score']:.3f} | {item['pass_rate']:.3f} |"
+            )
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return
+
+    include_profile = any("profile" in item for item in items)
+    if include_profile:
+        lines.append("| Sample | Profile | Score | Passed | Notes |")
+        lines.append("| --- | --- | ---: | :---: | --- |")
+    else:
+        lines.append("| Sample | Score | Passed | Notes |")
+        lines.append("| --- | ---: | :---: | --- |")
+    for item in items:
+        evaluation = item.get("evaluation") or {}
+        score = evaluation.get("score", "-")
+        passed = "yes" if evaluation.get("passed") else "no"
+        notes = _failed_check_summary(evaluation.get("checks", []))
+        if include_profile:
+            lines.append(f"| `{item['id']}` | `{item.get('profile', '-')}` | {score} | {passed} | {notes} |")
+        else:
+            lines.append(f"| `{item['id']}` | {score} | {passed} | {notes} |")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _failed_check_summary(checks: list[dict[str, Any]]) -> str:
+    failures = [check["name"] for check in checks if not check.get("passed")]
+    if not failures:
+        return "all checks passed"
+    return ", ".join(failures[:4])
