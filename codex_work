@@ -368,3 +368,28 @@
 3. 用 `dataset-bootstrap-expected` 生成模板，再人工修正。
 4. 用 `dataset-optimize` 比较不同 profile / 参数组合。
 5. 针对失败模式继续增强启发式与结构恢复质量。
+
+---
+
+## 2026年04月21日11时19分
+### 做了什么
+- 继续补充真实样例优化循环的可读报告能力：
+  - `dataset-run` 现在会为每个样例输出 `<sample-id>/summary.md`；
+  - summary 里包含输入路径、profile、SVG/draw.io/report 路径、primitive counts、relation counts、text count、evaluation checks；
+  - `dataset-optimize` 现在额外输出 `optimization-comparison.json` 和 `optimization-comparison.md`，按样例比较各 profile 得分并给出 best profile；
+  - 更新 `README.md`，把这些新增报告产物写进输出说明；
+  - 更新测试，覆盖 sample summary 和 profile comparison 报告文件。
+
+### 取得的效果
+- 后续放入真实 `Nano Banana` PNG 后，不需要只看 JSON；可以直接读 Markdown summary 找失败点。
+- profile sweep 也不再只有总体平均分，还能看到每个样例哪个 profile 最好。
+- 这对真实样例驱动的精度优化很关键，因为真实失败通常是样例级、类型级暴露出来的。
+
+### 验证
+- 运行 `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 当前结果：`4 tests OK`
+
+### 下一步计划
+1. 继续增强真实样例诊断输出，比如为失败 check 给出 repair hints。
+2. 当有真实 PNG 后，优先用 `dataset-optimize` 找出表现差异最大的样例。
+3. 针对这些样例继续改 arrow / polyline / text relation / grouping。

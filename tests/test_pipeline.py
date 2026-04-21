@@ -87,6 +87,7 @@ class PipelineSmokeTests(unittest.TestCase):
             self.assertEqual(1, len(results))
             self.assertTrue((root / "outputs" / "summary.json").exists())
             self.assertTrue((root / "outputs" / "report.md").exists())
+            self.assertTrue((root / "outputs" / "real-sample" / "summary.md").exists())
             self.assertTrue(results[0]["evaluation"]["passed"])
 
             evaluations = evaluate_dataset(root)
@@ -108,6 +109,8 @@ class PipelineSmokeTests(unittest.TestCase):
             self.assertEqual(2, len(leaderboard))
             self.assertTrue((root / "outputs" / "optimization-summary.json").exists())
             self.assertTrue((root / "outputs" / "optimization-report.md").exists())
+            self.assertTrue((root / "outputs" / "optimization-comparison.json").exists())
+            self.assertTrue((root / "outputs" / "optimization-comparison.md").exists())
 
 
 if __name__ == "__main__":

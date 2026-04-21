@@ -140,6 +140,7 @@ def run_dataset(
     results: list[dict[str, object]] = []
     for sample in manifest:
         sample_dir = destination / sample.sample_id
+        sample_dir.mkdir(parents=True, exist_ok=True)
         svg_path = sample_dir / "output.svg"
         report_path = sample_dir / "report.json"
         drawio_path = sample_dir / "output.drawio"
@@ -163,9 +164,13 @@ def run_dataset(
                 "report": str(report_path),
                 "drawio": str(drawio_path),
                 "profile": profile,
+                "primitive_counts": dict(sorted(Counter(primitive.kind for primitive in scene.primitives).items())),
+                "relation_counts": dict(sorted(Counter(relation.kind for relation in scene.relations).items())),
+                "text_count": len(scene.texts),
                 "evaluation": evaluation.to_dict() if evaluation is not None else None,
             }
         )
+        _write_sample_summary(sample_dir / "summary.md", results[-1], sample.notes)
 
     summary_path = destination / "summary.json"
     summary_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
@@ -234,6 +239,7 @@ def optimize_dataset(
     outputs_root = root / "outputs"
     outputs_root.mkdir(parents=True, exist_ok=True)
     leaderboard: list[dict[str, object]] = []
+    comparisons: dict[str, dict[str, dict[str, object]]] = {}
 
     for profile in profiles:
         profile_output = outputs_root / profile
@@ -246,6 +252,12 @@ def optimize_dataset(
         else:
             average_score = 0.0
             pass_rate = 0.0
+        for item in evaluations:
+            comparisons.setdefault(item["id"], {})[profile] = item.get("evaluation") or {
+                "passed": False,
+                "score": 0.0,
+                "checks": [],
+            }
         leaderboard.append(
             {
                 "profile": profile,
@@ -258,6 +270,9 @@ def optimize_dataset(
     leaderboard.sort(key=lambda item: (-item["average_score"], -item["pass_rate"], item["profile"]))
     (outputs_root / "optimization-summary.json").write_text(json.dumps(leaderboard, indent=2), encoding="utf-8")
     _write_markdown_report(outputs_root / "optimization-report.md", leaderboard, title="FigVector profile sweep")
+    comparison_rows = _comparison_rows(comparisons, profiles)
+    (outputs_root / "optimization-comparison.json").write_text(json.dumps(comparison_rows, indent=2), encoding="utf-8")
+    _write_optimization_comparison(outputs_root / "optimization-comparison.md", comparison_rows, profiles)
     return leaderboard
 
 
@@ -486,3 +501,82 @@ def _expected_from_report(report: dict[str, Any], *, required_text_limit: int) -
         deduped_texts = list(dict.fromkeys(texts))
         expected["required_texts"] = deduped_texts[: max(0, required_text_limit)]
     return expected
+
+
+def _write_sample_summary(path: Path, item: dict[str, object], notes: str) -> None:
+    evaluation = item.get("evaluation") or {}
+    primitive_counts = item.get("primitive_counts", {})
+    relation_counts = item.get("relation_counts", {})
+    lines = [
+        f"# Sample `{item['id']}`",
+        "",
+        f"- Input: `{item['input']}`",
+        f"- Profile: `{item.get('profile', '-')}`",
+        f"- SVG: `{item['svg']}`",
+        f"- draw.io: `{item['drawio']}`",
+        f"- Report: `{item['report']}`",
+        f"- Text count: {item.get('text_count', 0)}",
+        f"- Evaluation score: {evaluation.get('score', '-')}",
+        f"- Evaluation passed: {evaluation.get('passed', '-')}",
+    ]
+    if notes:
+        lines.extend(["", "## Notes", notes])
+    if primitive_counts:
+        lines.extend(["", "## Primitive counts"])
+        for kind, count in primitive_counts.items():
+            lines.append(f"- `{kind}`: {count}")
+    if relation_counts:
+        lines.extend(["", "## Relation counts"])
+        for kind, count in relation_counts.items():
+            lines.append(f"- `{kind}`: {count}")
+    checks = evaluation.get("checks", [])
+    if checks:
+        lines.extend(["", "## Evaluation checks"])
+        for check in checks:
+            status = "PASS" if check.get("passed") else "FAIL"
+            lines.append(f"- [{status}] `{check['name']}` expected={check.get('expected')} actual={check.get('actual')}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _comparison_rows(
+    comparisons: dict[str, dict[str, dict[str, object]]],
+    profiles: list[str],
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for sample_id in sorted(comparisons):
+        profile_map = comparisons[sample_id]
+        best_profile = None
+        best_score = -1.0
+        for profile in profiles:
+            score = float((profile_map.get(profile) or {}).get("score", 0.0))
+            if score > best_score:
+                best_score = score
+                best_profile = profile
+        row = {"id": sample_id, "best_profile": best_profile, "profiles": {}}
+        for profile in profiles:
+            evaluation = profile_map.get(profile) or {"passed": False, "score": 0.0}
+            row["profiles"][profile] = {
+                "score": evaluation.get("score", 0.0),
+                "passed": evaluation.get("passed", False),
+            }
+        rows.append(row)
+    return rows
+
+
+def _write_optimization_comparison(path: Path, rows: list[dict[str, object]], profiles: list[str]) -> None:
+    lines = ["# FigVector optimization comparison", ""]
+    if not rows:
+        lines.append("No samples were available for profile comparison.")
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return
+
+    header = "| Sample | Best | " + " | ".join(f"{profile} score" for profile in profiles) + " |"
+    divider = "| --- | --- | " + " | ".join("---:" for _ in profiles) + " |"
+    lines.extend([header, divider])
+    for row in rows:
+        cells = [f"`{row['id']}`", f"`{row['best_profile']}`"]
+        for profile in profiles:
+            score = row["profiles"][profile]["score"]
+            cells.append(str(score))
+        lines.append("| " + " | ".join(cells) + " |")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")

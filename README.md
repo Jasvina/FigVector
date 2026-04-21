@@ -162,8 +162,10 @@ PYTHONPATH=src python3 -m figvector dataset-optimize datasets/nano_banana --ocr-
 这会在 `datasets/nano_banana/outputs/` 下生成：
 
 - `summary.json` / `report.md`
+- `<sample-id>/summary.md`
 - `evaluation-summary.json` / `evaluation-report.md`
 - `optimization-summary.json` / `optimization-report.md`
+- `optimization-comparison.json` / `optimization-comparison.md`
 
 ### 9. Run tests
 
