@@ -4,7 +4,14 @@ import argparse
 import json
 from pathlib import Path
 
-from .dataset import create_dataset_scaffold, evaluate_dataset, optimize_dataset, register_inbox_samples, run_dataset
+from .dataset import (
+    bootstrap_expected_from_outputs,
+    create_dataset_scaffold,
+    evaluate_dataset,
+    optimize_dataset,
+    register_inbox_samples,
+    run_dataset,
+)
 from .demo import build_demo_assets
 from .ocr import OCRConfig
 from .pipeline import vectorize_png
@@ -34,6 +41,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     dataset_register = subparsers.add_parser("dataset-register", help="Register PNGs from inbox/ into the dataset manifest.")
     dataset_register.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
+
+    dataset_bootstrap = subparsers.add_parser("dataset-bootstrap-expected", help="Populate missing expected blocks from existing dataset reports.")
+    dataset_bootstrap.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
+    dataset_bootstrap.add_argument("--output-dir", help="Optional output directory override.")
+    dataset_bootstrap.add_argument("--overwrite", action="store_true", help="Overwrite existing expected blocks.")
+    dataset_bootstrap.add_argument("--required-text-limit", type=int, default=8, help="Maximum number of required texts to seed from each report.")
 
     dataset_run = subparsers.add_parser("dataset-run", help="Vectorize every sample registered in a dataset manifest.")
     dataset_run.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
@@ -93,6 +106,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "dataset-register":
         result = register_inbox_samples(args.root)
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "dataset-bootstrap-expected":
+        result = bootstrap_expected_from_outputs(
+            args.root,
+            output_dir=args.output_dir,
+            overwrite=args.overwrite,
+            required_text_limit=args.required_text_limit,
+        )
         print(json.dumps(result, indent=2))
         return 0
 

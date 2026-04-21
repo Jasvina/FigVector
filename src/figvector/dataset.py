@@ -90,6 +90,38 @@ def register_inbox_samples(root: str | Path, *, create_sidecars: bool = True) ->
     return additions
 
 
+def bootstrap_expected_from_outputs(
+    root: str | Path,
+    *,
+    output_dir: str | Path | None = None,
+    overwrite: bool = False,
+    required_text_limit: int = 8,
+) -> list[dict[str, object]]:
+    root = Path(root)
+    manifest_path = root / "manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    samples = list(payload.get("samples", []))
+    source = Path(output_dir) if output_dir is not None else root / "outputs"
+    source.mkdir(parents=True, exist_ok=True)
+
+    updated: list[dict[str, object]] = []
+    for item in samples:
+        if item.get("expected") and not overwrite:
+            continue
+        report_path = source / item["id"] / "report.json"
+        if not report_path.exists():
+            continue
+
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        expected = _expected_from_report(report, required_text_limit=required_text_limit)
+        item["expected"] = expected
+        updated.append({"id": item["id"], "expected": expected})
+
+    payload["samples"] = samples
+    manifest_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return updated
+
+
 def run_dataset(
     root: str | Path,
     *,
@@ -435,3 +467,22 @@ def _failed_check_summary(checks: list[dict[str, Any]]) -> str:
     if not failures:
         return "all checks passed"
     return ", ".join(failures[:4])
+
+
+def _expected_from_report(report: dict[str, Any], *, required_text_limit: int) -> dict[str, object]:
+    primitive_counts = Counter(item.get("kind", "") for item in report.get("primitives", []))
+    relation_counts = Counter(item.get("kind", "") for item in report.get("relations", []))
+    texts = [item.get("text", "").strip() for item in report.get("texts", []) if item.get("text", "").strip()]
+
+    expected: dict[str, object] = {
+        "min_primitives": len(report.get("primitives", [])),
+        "min_texts": len(report.get("texts", [])),
+    }
+    if primitive_counts:
+        expected["primitive_counts"] = dict(sorted(primitive_counts.items()))
+    if relation_counts:
+        expected["relation_counts"] = dict(sorted(relation_counts.items()))
+    if texts:
+        deduped_texts = list(dict.fromkeys(texts))
+        expected["required_texts"] = deduped_texts[: max(0, required_text_limit)]
+    return expected

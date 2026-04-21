@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from figvector.dataset import (
+    bootstrap_expected_from_outputs,
     create_dataset_scaffold,
     evaluate_dataset,
     optimize_dataset,
@@ -93,6 +94,15 @@ class PipelineSmokeTests(unittest.TestCase):
             self.assertTrue(evaluations[0]["evaluation"]["passed"])
             self.assertTrue((root / "outputs" / "evaluation-summary.json").exists())
             self.assertTrue((root / "outputs" / "evaluation-report.md").exists())
+
+            manifest = json.loads(scaffold["manifest"].read_text(encoding="utf-8"))
+            manifest["samples"][0].pop("expected", None)
+            scaffold["manifest"].write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+            bootstrapped = bootstrap_expected_from_outputs(root)
+            self.assertEqual(1, len(bootstrapped))
+            refreshed_manifest = json.loads(scaffold["manifest"].read_text(encoding="utf-8"))
+            self.assertIn("expected", refreshed_manifest["samples"][0])
+            self.assertEqual(4, refreshed_manifest["samples"][0]["expected"]["primitive_counts"]["rectangle"])
 
             leaderboard = optimize_dataset(root, profiles=["synthetic", "real"], ocr_backend="sidecar-json")
             self.assertEqual(2, len(leaderboard))

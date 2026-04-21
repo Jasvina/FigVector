@@ -20,8 +20,9 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
    ```
 4. Optionally add an `expected` block per sample in `manifest.json` for lightweight benchmark checks.
 5. Run `figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json --profile real`.
-6. Inspect `outputs/<sample-id>/`, `outputs/report.md`, and `outputs/evaluation-report.md` for generated artifacts and summaries.
-7. Run `figvector dataset-eval datasets/nano_banana` to compare generated scene graphs against the expected checks.
-8. Run `figvector dataset-optimize datasets/nano_banana --ocr-backend sidecar-json --profiles synthetic real` to compare analysis profiles on the same dataset.
+6. Run `figvector dataset-bootstrap-expected datasets/nano_banana` if you want to seed missing `expected` blocks from the current reports as a starting point.
+7. Inspect `outputs/<sample-id>/`, `outputs/report.md`, and `outputs/evaluation-report.md` for generated artifacts and summaries.
+8. Run `figvector dataset-eval datasets/nano_banana` to compare generated scene graphs against the expected checks.
+9. Run `figvector dataset-optimize datasets/nano_banana --ocr-backend sidecar-json --profiles synthetic real` to compare analysis profiles on the same dataset.
 
 This scaffold exists so the repo can grow from a synthetic demo toward a real evaluation set without guessing hidden file layouts each time.

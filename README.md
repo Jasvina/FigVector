@@ -33,6 +33,7 @@
 - 提供真实 `Nano Banana` PNG 样例集脚手架，方便把 repo 从 synthetic demo 推向真实评测；
 - 支持 lightweight dataset evaluation，可用 `expected` 规则检查 primitive / relation / text 是否大致命中；
 - 支持 `dataset-register` / `dataset-optimize`，把真实样例 intake、profile sweep 和误差摘要放进同一条工作流；
+- 支持 `dataset-bootstrap-expected`，可以从已有 report 自动生成 benchmark 模板；
 - 额外导出结构化 `JSON report`，为后续更强的 scene graph 打底；
 - 生成一套可复现的 demo 输入/输出，方便我们持续迭代。
 
@@ -146,7 +147,13 @@ PYTHONPATH=src python3 -m figvector dataset-register datasets/nano_banana
 PYTHONPATH=src python3 -m figvector dataset-eval datasets/nano_banana
 ```
 
-### 7. Sweep profiles on the dataset
+### 7. Bootstrap expected templates from current outputs
+
+```bash
+PYTHONPATH=src python3 -m figvector dataset-bootstrap-expected datasets/nano_banana
+```
+
+### 8. Sweep profiles on the dataset
 
 ```bash
 PYTHONPATH=src python3 -m figvector dataset-optimize datasets/nano_banana --ocr-backend sidecar-json --profiles synthetic real
@@ -158,7 +165,7 @@ PYTHONPATH=src python3 -m figvector dataset-optimize datasets/nano_banana --ocr-
 - `evaluation-summary.json` / `evaluation-report.md`
 - `optimization-summary.json` / `optimization-report.md`
 
-### 8. Run tests
+### 9. Run tests
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests

@@ -316,3 +316,55 @@
 2. 为每个样例补 sidecar 和 expected。
 3. 跑 `dataset-optimize` 找出更好的 profile / 参数组合。
 4. 针对失败样例集中暴露的问题，继续增强 arrow、polyline、text attachment 和 grouping。
+
+---
+
+## 2026年04月21日09时52分
+### 做了什么
+- 继续补齐“真实样例驱动精度优化”的基础工作流，新增了 expected 自举能力：
+  - 扩展 `src/figvector/dataset.py`，新增 `bootstrap_expected_from_outputs()`；
+  - 新增 CLI 命令 `dataset-bootstrap-expected`；
+  - 让已有 `report.json` 可以反向生成 `manifest.json` 里的 `expected` 模板，自动填入：
+    - `min_primitives`
+    - `min_texts`
+    - `primitive_counts`
+    - `relation_counts`
+    - `required_texts`
+  - 更新 `README.md` 与 `datasets/nano_banana/README.md`，把这条用法写进去；
+  - 扩展 `tests/test_pipeline.py`，让测试覆盖 expected 自举这一步。
+
+### 取得的效果
+- 真实样例集工作流又少了一个人工瓶颈：
+  - 现在不需要从零手写每个样例的 `expected`；
+  - 可以先跑一遍 pipeline，直接从输出报告生成 benchmark 模板，再人工微调；
+  - 这更适合真实样例不断增长的阶段。
+- 现在真实样例闭环已经变成：
+  1. 放 PNG 到 `inbox/`
+  2. `dataset-register`
+  3. `dataset-run`
+  4. `dataset-bootstrap-expected`
+  5. 人工微调 expected
+  6. `dataset-eval`
+  7. `dataset-optimize`
+
+### 验证
+- 运行 `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 当前结果：`4 tests OK`
+- 其中 dataset 测试现在已覆盖：
+  - scaffold
+  - inbox 注册
+  - batch run
+  - eval
+  - optimize
+  - expected 自举
+
+### 当前结论
+- 现在仓库已经具备一条更完整的 benchmark bootstrapping 流程。
+- 对真实样例阶段来说，下一步最稀缺的已经更加明确：不是工具链，而是**真实 Nano Banana PNG 样例本身**。
+
+### 下一步计划
+1. 导入第一批真实 PNG。
+2. 跑 `dataset-register` 和 `dataset-run`。
+3. 用 `dataset-bootstrap-expected` 生成模板，再人工修正。
+4. 用 `dataset-optimize` 比较不同 profile / 参数组合。
+5. 针对失败模式继续增强启发式与结构恢复质量。
