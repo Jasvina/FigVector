@@ -87,7 +87,11 @@ class PipelineSmokeTests(unittest.TestCase):
             self.assertEqual(1, len(results))
             self.assertTrue((root / "outputs" / "summary.json").exists())
             self.assertTrue((root / "outputs" / "report.md").exists())
+            self.assertTrue((root / "outputs" / "index.html").exists())
             self.assertTrue((root / "outputs" / "real-sample" / "summary.md").exists())
+            review_html = root / "outputs" / "real-sample" / "review.html"
+            self.assertTrue(review_html.exists())
+            self.assertIn("Output SVG", review_html.read_text(encoding="utf-8"))
             self.assertTrue(results[0]["evaluation"]["passed"])
 
             evaluations = evaluate_dataset(root)

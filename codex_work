@@ -393,3 +393,28 @@
 1. 继续增强真实样例诊断输出，比如为失败 check 给出 repair hints。
 2. 当有真实 PNG 后，优先用 `dataset-optimize` 找出表现差异最大的样例。
 3. 针对这些样例继续改 arrow / polyline / text relation / grouping。
+
+---
+
+## 2026年04月21日11时32分
+### 做了什么
+- 继续朝真实可用方向推进，把真实样例评审从 markdown/json 再推进到 HTML review：
+  - `dataset-run` 现在会生成 `outputs/index.html`，作为整个数据集的审阅入口；
+  - 每个样例现在会生成 `outputs/<sample-id>/review.html`；
+  - review 页面会并排展示 input PNG 和 output SVG；
+  - review 页面还展示 primitive counts、relation counts、evaluation checks、summary/report/draw.io 链接；
+  - `dataset-register` 现在支持大小写 PNG 后缀，例如 `.png` 和 `.PNG`；
+  - 更新 `README.md`、`datasets/nano_banana/README.md` 与测试。
+
+### 取得的效果
+- 真实样例进入仓库后，用户不需要先读 JSON 才能判断效果；可以直接打开 `outputs/index.html`，再点进每个样例的 `review.html`。
+- 这更接近真实可用的人工评审工作流：看图、看 SVG、看失败 check、再决定下一步修哪类启发式。
+
+### 验证
+- 运行 `PYTHONPATH=src python3 -m unittest discover -s tests -v`
+- 当前结果：`4 tests OK`
+
+### 下一步计划
+1. 继续加入更具体的 repair hints，让失败 check 能指向可能的修复方向。
+2. 真实样例加入后，用 HTML review 快速定位问题类型。
+3. 针对真实失败模式继续增强图元检测与关系恢复。

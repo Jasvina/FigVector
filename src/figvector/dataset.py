@@ -4,6 +4,8 @@ import json
 import re
 from collections import Counter
 from dataclasses import dataclass
+from html import escape as html_escape
+from os.path import relpath
 from pathlib import Path
 from typing import Any
 
@@ -61,7 +63,8 @@ def register_inbox_samples(root: str | Path, *, create_sidecars: bool = True) ->
     existing_ids = {item.get("id") for item in samples}
 
     additions: list[dict[str, object]] = []
-    for png_path in sorted((root / "inbox").glob("*.png")):
+    inbox_pngs = sorted(path for path in (root / "inbox").iterdir() if path.is_file() and path.suffix.lower() == ".png")
+    for png_path in inbox_pngs:
         relative_png = str(png_path.relative_to(root))
         if relative_png in existing_pngs:
             continue
@@ -171,10 +174,12 @@ def run_dataset(
             }
         )
         _write_sample_summary(sample_dir / "summary.md", results[-1], sample.notes)
+        _write_sample_review_html(sample_dir / "review.html", results[-1], sample.notes)
 
     summary_path = destination / "summary.json"
     summary_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
     _write_markdown_report(destination / "report.md", results, title=f"FigVector dataset run ({profile})")
+    _write_dataset_index(destination / "index.html", results, title=f"FigVector dataset run ({profile})")
     return results
 
 
@@ -538,6 +543,127 @@ def _write_sample_summary(path: Path, item: dict[str, object], notes: str) -> No
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_sample_review_html(path: Path, item: dict[str, object], notes: str) -> None:
+    input_link = _relative_link(path.parent, Path(str(item["input"])))
+    svg_link = _relative_link(path.parent, Path(str(item["svg"])))
+    report_link = _relative_link(path.parent, Path(str(item["report"])))
+    drawio_link = _relative_link(path.parent, Path(str(item["drawio"])))
+    summary_link = "summary.md"
+    evaluation = item.get("evaluation") or {}
+    checks = evaluation.get("checks", [])
+    primitive_counts = item.get("primitive_counts", {})
+    relation_counts = item.get("relation_counts", {})
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FigVector review - {html_escape(str(item['id']))}</title>
+  <style>
+    body {{ margin: 0; font-family: Avenir, Helvetica, Arial, sans-serif; background: #fbfaf6; color: #2e3247; }}
+    header {{ padding: 24px 32px; border-bottom: 1px solid #d8e0ee; background: #fff; }}
+    main {{ padding: 24px 32px; }}
+    .grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }}
+    .card {{ background: #fff; border: 1px solid #d8e0ee; border-radius: 18px; padding: 18px; box-shadow: 0 12px 30px rgba(46, 50, 71, 0.08); }}
+    img, object {{ width: 100%; height: 560px; object-fit: contain; background: #fff; border-radius: 12px; border: 1px solid #edf1f7; }}
+    code {{ background: #edf1f7; padding: 2px 6px; border-radius: 6px; }}
+    table {{ border-collapse: collapse; width: 100%; margin-top: 10px; }}
+    th, td {{ border-bottom: 1px solid #edf1f7; padding: 8px; text-align: left; }}
+    .pass {{ color: #2f805b; font-weight: 700; }}
+    .fail {{ color: #b84a4a; font-weight: 700; }}
+    @media (max-width: 900px) {{ .grid {{ grid-template-columns: 1fr; }} img, object {{ height: 360px; }} }}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FigVector review: <code>{html_escape(str(item['id']))}</code></h1>
+    <p>Profile: <code>{html_escape(str(item.get('profile', '-')))}</code> | Score: <code>{html_escape(str(evaluation.get('score', '-')))}</code> | Passed: <code>{html_escape(str(evaluation.get('passed', '-')))}</code></p>
+    <p><a href="{html_escape(summary_link)}">summary.md</a> · <a href="{html_escape(report_link)}">report.json</a> · <a href="{html_escape(drawio_link)}">draw.io XML</a></p>
+  </header>
+  <main>
+    <section class="grid">
+      <article class="card">
+        <h2>Input PNG</h2>
+        <img src="{html_escape(input_link)}" alt="Input PNG">
+      </article>
+      <article class="card">
+        <h2>Output SVG</h2>
+        <object data="{html_escape(svg_link)}" type="image/svg+xml"></object>
+      </article>
+    </section>
+    <section class="grid" style="margin-top:20px">
+      <article class="card">
+        <h2>Primitive counts</h2>
+        {_counts_table(primitive_counts)}
+      </article>
+      <article class="card">
+        <h2>Relation counts</h2>
+        {_counts_table(relation_counts)}
+      </article>
+    </section>
+    <section class="card" style="margin-top:20px">
+      <h2>Evaluation checks</h2>
+      {_checks_table(checks)}
+    </section>
+    <section class="card" style="margin-top:20px">
+      <h2>Notes</h2>
+      <p>{html_escape(notes or 'No notes recorded.')}</p>
+    </section>
+  </main>
+</body>
+</html>
+"""
+    path.write_text(html, encoding="utf-8")
+
+
+def _write_dataset_index(path: Path, items: list[dict[str, object]], *, title: str) -> None:
+    rows = []
+    for item in items:
+        sample_dir = Path(str(item["report"])).parent
+        review_link = _relative_link(path.parent, sample_dir / "review.html")
+        evaluation = item.get("evaluation") or {}
+        passed = evaluation.get("passed", "-")
+        score = evaluation.get("score", "-")
+        rows.append(
+            f"<tr><td><a href=\"{html_escape(review_link)}\"><code>{html_escape(str(item['id']))}</code></a></td>"
+            f"<td>{html_escape(str(item.get('profile', '-')))}</td>"
+            f"<td>{html_escape(str(score))}</td>"
+            f"<td>{html_escape(str(passed))}</td>"
+            f"<td>{html_escape(_failed_check_summary(evaluation.get('checks', [])))}</td></tr>"
+        )
+
+    body = "\n".join(rows) if rows else "<tr><td colspan=\"5\">No samples were available for this run.</td></tr>"
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{html_escape(title)}</title>
+  <style>
+    body {{ margin: 0; font-family: Avenir, Helvetica, Arial, sans-serif; background: #fbfaf6; color: #2e3247; }}
+    main {{ padding: 28px 34px; }}
+    table {{ border-collapse: collapse; width: 100%; background: #fff; border: 1px solid #d8e0ee; border-radius: 16px; overflow: hidden; }}
+    th, td {{ border-bottom: 1px solid #edf1f7; padding: 10px 12px; text-align: left; }}
+    th {{ background: #eef5ff; }}
+    code {{ background: #edf1f7; padding: 2px 6px; border-radius: 6px; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{html_escape(title)}</h1>
+    <p>Open a sample row to compare the input PNG with the reconstructed SVG.</p>
+    <table>
+      <thead><tr><th>Sample</th><th>Profile</th><th>Score</th><th>Passed</th><th>Notes</th></tr></thead>
+      <tbody>
+        {body}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
+"""
+    path.write_text(html, encoding="utf-8")
+
+
 def _comparison_rows(
     comparisons: dict[str, dict[str, dict[str, object]]],
     profiles: list[str],
@@ -580,3 +706,31 @@ def _write_optimization_comparison(path: Path, rows: list[dict[str, object]], pr
             cells.append(str(score))
         lines.append("| " + " | ".join(cells) + " |")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _counts_table(counts: dict[str, object]) -> str:
+    if not counts:
+        return "<p>No counts available.</p>"
+    rows = "\n".join(
+        f"<tr><td><code>{html_escape(str(kind))}</code></td><td>{html_escape(str(count))}</td></tr>"
+        for kind, count in counts.items()
+    )
+    return f"<table><thead><tr><th>Kind</th><th>Count</th></tr></thead><tbody>{rows}</tbody></table>"
+
+
+def _checks_table(checks: list[dict[str, Any]]) -> str:
+    if not checks:
+        return "<p>No checks available.</p>"
+    rows = []
+    for check in checks:
+        status = "PASS" if check.get("passed") else "FAIL"
+        klass = "pass" if check.get("passed") else "fail"
+        rows.append(
+            f"<tr><td class=\"{klass}\">{status}</td><td><code>{html_escape(str(check.get('name')))}</code></td>"
+            f"<td>{html_escape(str(check.get('expected')))}</td><td>{html_escape(str(check.get('actual')))}</td></tr>"
+        )
+    return "<table><thead><tr><th>Status</th><th>Check</th><th>Expected</th><th>Actual</th></tr></thead><tbody>" + "\n".join(rows) + "</tbody></table>"
+
+
+def _relative_link(from_dir: Path, target: Path) -> str:
+    return relpath(target, from_dir)
