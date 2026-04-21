@@ -4,7 +4,11 @@
 >
 > 把干净的科研示意图 PNG 重建为可编辑的矢量图（首版聚焦 SVG）。
 
-![FigVector hero](docs/assets/figvector-hero.svg)
+![FigVector promotional poster](docs/assets/figvector-poster.png)
+
+<p align="center">
+  <sub>Poster source: <code>docs/assets/figvector-poster.svg</code> · Design philosophy: <code>docs/design/figvector-poster-philosophy.md</code></sub>
+</p>
 
 ## Why FigVector
 

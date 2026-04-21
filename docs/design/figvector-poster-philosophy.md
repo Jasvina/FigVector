@@ -1,0 +1,9 @@
+# Vector Cartography
+
+Vector Cartography treats transformation as a mapped territory: raw pixels are not erased, but surveyed, named, and rebuilt into navigable structure. Space is divided with cartographic discipline: wide margins, precise registers, nested frames, coordinate marks, and small systematic labels. The composition should feel like a master diagram pinned inside a future laboratory, meticulously crafted and labored over with the patience of a cartographer drawing a coastline from memory and measurement at once.
+
+Form should move from granular to legible. One side holds raster matter: tiles, dots, imperfect clusters, and muted image fragments. The other side holds editable intelligence: clean paths, graph nodes, arrows, handles, layers, and export plates. The bridge between them must be visual, not verbose; the eye should understand the work before the words explain it. Every anchor, rule, and connector should appear placed by someone at the top of their field, with painstaking attention to spacing and rhythm.
+
+Color is scientific but warm: aged paper, ink blue, reagent green, signal amber, and precise graphite. Nothing should feel like a generic technology gradient. The palette should evoke notebooks, instrument panels, microscopy labels, and archival charts. High craft comes from controlled contrast, subtle texture, careful alignment, and the sense that countless refinements were made to make the system look inevitable.
+
+Typography is sparse and structural. Words are labels, coordinates, specimen tags, and short declarations; they are never paragraphs. Scale should create hierarchy: one confident title, a few technical callouts, and small metadata. The final artifact should read as a promotional poster only after it first succeeds as an art object: dense enough to reward inspection, clear enough to understand instantly, and polished enough to represent a serious open-source research tool.

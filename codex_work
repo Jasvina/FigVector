@@ -418,3 +418,30 @@
 1. 继续加入更具体的 repair hints，让失败 check 能指向可能的修复方向。
 2. 真实样例加入后，用 HTML review 快速定位问题类型。
 3. 针对真实失败模式继续增强图元检测与关系恢复。
+
+---
+
+## 2026年04月21日11时42分
+### 做了什么
+- 为 README 设计并加入一张更适合宣传传播的 FigVector poster：
+  - 新增 `docs/design/figvector-poster-philosophy.md`，记录视觉哲学 `Vector Cartography`；
+  - 新增 `docs/assets/figvector-poster.svg`，作为可编辑海报源文件；
+  - 使用 `sips` 生成 `docs/assets/figvector-poster.png`，方便 GitHub README 稳定展示；
+  - 更新 `README.md` 顶部，把原来的 hero 替换为更丰富的宣传海报，并标注源文件与设计哲学位置。
+
+### 取得的效果
+- README 打开后第一眼不再只是普通项目说明，而是有一张完整的视觉海报，表达：
+  - PNG raster input
+  - semantic lift
+  - editable SVG / draw.io scene graph
+  - dataset / benchmark / refinement workflow
+- 海报同时保留了可编辑 SVG 源文件和展示用 PNG 文件，便于后续继续迭代视觉资产。
+
+### 验证
+- 使用 Python XML parser 验证 `docs/assets/figvector-poster.svg` 可解析；
+- 使用 `sips` 生成 1600x900 PNG；
+- 运行 `file` / `sips -g pixelWidth -g pixelHeight` 确认 PNG 为 1600x900。
+
+### 下一步计划
+1. 如果要进一步宣传，可以继续做 GitHub social preview 版本（1280x640）。
+2. 后续真实样例进入后，可以把 poster 里的 demo 图更新成真实 reconstruction 截图。
