@@ -1,0 +1,455 @@
+{
+  "width": 880,
+  "height": 460,
+  "background": [
+    251,
+    250,
+    246,
+    255
+  ],
+  "primitives": [
+    {
+      "kind": "region",
+      "bbox": {
+        "x": 220,
+        "y": 60,
+        "width": 420,
+        "height": 222
+      },
+      "color": [
+        226,
+        233,
+        242,
+        255
+      ],
+      "confidence": 0.61,
+      "metadata": {
+        "area": 34617,
+        "fill_ratio": 0.371,
+        "row_multi_ratio": 0.234,
+        "col_multi_ratio": 0.0,
+        "bbox_area": 93240,
+        "bucket": "rgb(224, 224, 240)",
+        "id": "primitive-1"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 270,
+        "y": 120,
+        "width": 120,
+        "height": 80
+      },
+      "color": [
+        90,
+        132,
+        255,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 9211,
+        "fill_ratio": 0.959,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.058,
+        "bbox_area": 9600,
+        "bucket": "rgb(80, 128, 240)",
+        "id": "primitive-2",
+        "group_with": "primitive-1"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 450,
+        "y": 120,
+        "width": 120,
+        "height": 80
+      },
+      "color": [
+        78,
+        196,
+        140,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 9211,
+        "fill_ratio": 0.959,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.058,
+        "bbox_area": 9600,
+        "bucket": "rgb(64, 192, 128)",
+        "id": "primitive-3",
+        "group_with": "primitive-1"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 40,
+        "y": 130,
+        "width": 140,
+        "height": 90
+      },
+      "color": [
+        255,
+        174,
+        86,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 12229,
+        "fill_ratio": 0.971,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.021,
+        "bbox_area": 12600,
+        "bucket": "rgb(240, 160, 80)",
+        "id": "primitive-4"
+      }
+    },
+    {
+      "kind": "arrow",
+      "bbox": {
+        "x": 387,
+        "y": 151,
+        "width": 67,
+        "height": 19
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.74,
+      "metadata": {
+        "area": 503,
+        "fill_ratio": 0.395,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
+        "direction": "right",
+        "bbox_area": 1273,
+        "bucket": "rgb(32, 48, 64)",
+        "id": "primitive-5",
+        "connects_from": "primitive-2",
+        "connects_to": "primitive-3",
+        "group_with": "primitive-1"
+      }
+    },
+    {
+      "kind": "polyline",
+      "bbox": {
+        "x": 497,
+        "y": 157,
+        "width": 207,
+        "height": 138
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.76,
+      "metadata": {
+        "area": 2693,
+        "fill_ratio": 0.094,
+        "row_multi_ratio": 0.043,
+        "col_multi_ratio": 0.242,
+        "points": [
+          [
+            595,
+            157
+          ],
+          [
+            595,
+            285
+          ],
+          [
+            686,
+            285
+          ],
+          [
+            686,
+            294
+          ]
+        ],
+        "bbox_area": 28566,
+        "bucket": "rgb(32, 48, 64)",
+        "id": "primitive-6",
+        "connects_from": "primitive-3",
+        "connects_to": "primitive-10"
+      }
+    },
+    {
+      "kind": "region",
+      "bbox": {
+        "x": 220,
+        "y": 164,
+        "width": 420,
+        "height": 176
+      },
+      "color": [
+        226,
+        233,
+        242,
+        255
+      ],
+      "confidence": 0.61,
+      "metadata": {
+        "area": 51330,
+        "fill_ratio": 0.694,
+        "row_multi_ratio": 0.562,
+        "col_multi_ratio": 0.612,
+        "bbox_area": 73920,
+        "bucket": "rgb(224, 224, 240)",
+        "id": "primitive-7"
+      }
+    },
+    {
+      "kind": "region",
+      "bbox": {
+        "x": 177,
+        "y": 166,
+        "width": 97,
+        "height": 19
+      },
+      "color": [
+        46,
+        50,
+        71,
+        255
+      ],
+      "confidence": 0.55,
+      "metadata": {
+        "area": 713,
+        "fill_ratio": 0.387,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
+        "bbox_area": 1843,
+        "bucket": "rgb(32, 48, 64)",
+        "id": "primitive-8"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 360,
+        "y": 250,
+        "width": 140,
+        "height": 70
+      },
+      "color": [
+        248,
+        223,
+        143,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 9497,
+        "fill_ratio": 0.969,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.021,
+        "bbox_area": 9800,
+        "bucket": "rgb(240, 208, 128)",
+        "id": "primitive-9",
+        "group_with": "primitive-7"
+      }
+    },
+    {
+      "kind": "rectangle",
+      "bbox": {
+        "x": 700,
+        "y": 250,
+        "width": 120,
+        "height": 70
+      },
+      "color": [
+        122,
+        186,
+        255,
+        255
+      ],
+      "confidence": 0.86,
+      "metadata": {
+        "area": 8090,
+        "fill_ratio": 0.963,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.033,
+        "bbox_area": 8400,
+        "bucket": "rgb(112, 176, 240)",
+        "id": "primitive-10"
+      }
+    }
+  ],
+  "texts": [
+    {
+      "text": "Input",
+      "bbox": {
+        "x": 82,
+        "y": 162,
+        "width": 60,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-1",
+        "label_for": "primitive-4"
+      }
+    },
+    {
+      "text": "Workspace",
+      "bbox": {
+        "x": 355,
+        "y": 78,
+        "width": 150,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-2",
+        "label_for": "primitive-1"
+      }
+    },
+    {
+      "text": "Detect",
+      "bbox": {
+        "x": 295,
+        "y": 150,
+        "width": 75,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-3",
+        "label_for": "primitive-2"
+      }
+    },
+    {
+      "text": "Refine",
+      "bbox": {
+        "x": 475,
+        "y": 150,
+        "width": 80,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-4",
+        "label_for": "primitive-3"
+      }
+    },
+    {
+      "text": "Review",
+      "bbox": {
+        "x": 392,
+        "y": 274,
+        "width": 80,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-5",
+        "label_for": "primitive-9"
+      }
+    },
+    {
+      "text": "Export",
+      "bbox": {
+        "x": 730,
+        "y": 274,
+        "width": 75,
+        "height": 24
+      },
+      "confidence": 0.99,
+      "source": "sidecar-json",
+      "metadata": {
+        "id": "text-6",
+        "label_for": "primitive-10"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "source_id": "primitive-2",
+      "target_id": "primitive-3",
+      "kind": "flows_to",
+      "confidence": 0.74
+    },
+    {
+      "source_id": "primitive-3",
+      "target_id": "primitive-10",
+      "kind": "linked_to",
+      "confidence": 0.52
+    },
+    {
+      "source_id": "text-1",
+      "target_id": "primitive-4",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-2",
+      "target_id": "primitive-1",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-3",
+      "target_id": "primitive-2",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-4",
+      "target_id": "primitive-3",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-5",
+      "target_id": "primitive-9",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "text-6",
+      "target_id": "primitive-10",
+      "kind": "labels",
+      "confidence": 0.99
+    },
+    {
+      "source_id": "primitive-1",
+      "target_id": "primitive-2",
+      "kind": "group_with",
+      "confidence": 0.78
+    },
+    {
+      "source_id": "primitive-1",
+      "target_id": "primitive-3",
+      "kind": "group_with",
+      "confidence": 0.78
+    },
+    {
+      "source_id": "primitive-1",
+      "target_id": "primitive-5",
+      "kind": "group_with",
+      "confidence": 0.78
+    },
+    {
+      "source_id": "primitive-7",
+      "target_id": "primitive-9",
+      "kind": "group_with",
+      "confidence": 0.78
+    }
+  ]
+}

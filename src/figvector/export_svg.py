@@ -36,6 +36,8 @@ def _primitive_to_svg(index: int, primitive: Primitive) -> list[str]:
         relation_attrs.append(f'data-figvector-from="{escape(str(primitive.metadata["connects_from"]))}"')
     if "connects_to" in primitive.metadata:
         relation_attrs.append(f'data-figvector-to="{escape(str(primitive.metadata["connects_to"]))}"')
+    if "group_with" in primitive.metadata:
+        relation_attrs.append(f'data-figvector-group-with="{escape(str(primitive.metadata["group_with"]))}"')
     common = (
         f'data-figvector-kind="{escape(primitive.kind)}" '
         f'data-figvector-confidence="{primitive.confidence:.2f}" '

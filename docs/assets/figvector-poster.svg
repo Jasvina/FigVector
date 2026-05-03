@@ -1,143 +1,199 @@
 <svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="paper" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FCF6E8"/>
-      <stop offset="0.55" stop-color="#F3F7F1"/>
-      <stop offset="1" stop-color="#E8F2F8"/>
+    <linearGradient id="paper" x1="112" y1="84" x2="1510" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCF5E7"/>
+      <stop offset="0.54" stop-color="#F4F8F2"/>
+      <stop offset="1" stop-color="#E7F1F8"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1020 430) rotate(90) scale(360 500)">
-      <stop stop-color="#9FE0C5" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#9FE0C5" stop-opacity="0"/>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1020 442) rotate(90) scale(350 420)">
+      <stop stop-color="#7EC9A8" stop-opacity="0.46"/>
+      <stop offset="1" stop-color="#7EC9A8" stop-opacity="0"/>
     </radialGradient>
-    <pattern id="microgrid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M32 0H0V32" stroke="#2E3247" stroke-opacity="0.045" stroke-width="1"/>
-      <circle cx="0" cy="0" r="1.3" fill="#2E3247" fill-opacity="0.08"/>
+    <radialGradient id="amberHalo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(578 392) rotate(90) scale(174 220)">
+      <stop stop-color="#E0B35A" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#E0B35A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDF8"/>
+      <stop offset="1" stop-color="#FBFBF7"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" stroke="#243042" stroke-opacity="0.055" stroke-width="1"/>
+      <circle cx="0" cy="0" r="1.1" fill="#243042" fill-opacity="0.08"/>
     </pattern>
-    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#263149" flood-opacity="0.12"/>
+    <pattern id="scan" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="2" height="14" fill="#243042" fill-opacity="0.04"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#203046" flood-opacity="0.12"/>
     </filter>
-    <marker id="arrow" markerWidth="18" markerHeight="12" refX="16" refY="6" orient="auto">
-      <path d="M0 0L18 6L0 12Z" fill="#2E3247"/>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.42 0"/>
+    </filter>
+    <marker id="arrow" markerWidth="16" markerHeight="12" refX="13" refY="6" orient="auto">
+      <path d="M0 0L16 6L0 12Z" fill="#243042"/>
     </marker>
     <style>
-      .serif { font-family: Georgia, 'Times New Roman', serif; }
-      .sans { font-family: Avenir, Helvetica, Arial, sans-serif; }
+      .serif { font-family: 'Iowan Old Style', 'Baskerville', 'Palatino Linotype', Georgia, serif; }
+      .sans { font-family: 'Avenir Next', 'Helvetica Neue', Helvetica, sans-serif; }
       .mono { font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; }
-      .ink { fill: #2E3247; }
-      .muted { fill: #65708C; }
-      .tiny { font-size: 16px; letter-spacing: 0.12em; }
+      .ink { fill: #243042; }
+      .muted { fill: #66728E; }
+      .tiny { font-size: 15px; letter-spacing: 0.14em; }
+      .tag { font-size: 16px; letter-spacing: 0.18em; }
       .label { font-size: 18px; font-weight: 700; }
-      .caption { font-size: 15px; letter-spacing: 0.06em; }
+      .caption { font-size: 14px; letter-spacing: 0.08em; }
+      .micro { font-size: 12px; letter-spacing: 0.12em; }
     </style>
   </defs>
 
   <rect width="1600" height="900" rx="42" fill="url(#paper)"/>
-  <rect width="1600" height="900" rx="42" fill="url(#microgrid)"/>
-  <rect width="1600" height="900" rx="42" fill="url(#glow)"/>
+  <rect width="1600" height="900" rx="42" fill="url(#grid)"/>
+  <rect width="1600" height="900" rx="42" fill="url(#halo)"/>
+  <rect width="1600" height="900" rx="42" fill="url(#amberHalo)"/>
 
-  <path d="M86 92H1514M86 810H1514M86 92V810M1514 92V810" stroke="#2E3247" stroke-opacity="0.18" stroke-width="2"/>
-  <path d="M124 128H1476V774H124V128Z" stroke="#2E3247" stroke-opacity="0.10" stroke-width="1.5" stroke-dasharray="8 12"/>
+  <path d="M86 90H1514M86 810H1514M86 90V810M1514 90V810" stroke="#243042" stroke-opacity="0.18" stroke-width="2"/>
+  <path d="M126 128H1474V774H126V128Z" stroke="#243042" stroke-opacity="0.1" stroke-width="1.5" stroke-dasharray="8 12"/>
+  <path d="M158 160H1440" stroke="#243042" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="2 12"/>
+  <path d="M158 742H1440" stroke="#243042" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="2 12"/>
 
-  <text x="118" y="86" class="mono tiny muted">OPEN-SOURCE SCIENTIFIC FIGURE RECONSTRUCTION · FIGVECTOR FIELD POSTER 001</text>
-  <text x="1210" y="86" class="mono tiny muted">PNG → SCENE GRAPH → SVG / DRAW.IO</text>
+  <text x="118" y="86" class="mono tiny muted">OPEN-SOURCE SCIENTIFIC FIGURE RECONSTRUCTION · FIGVECTOR POSTER 02</text>
+  <text x="1166" y="86" class="mono tiny muted">PNG → SCENE GRAPH → SVG / DRAW.IO</text>
 
-  <text x="118" y="188" class="serif ink" font-size="96" font-weight="700">FigVector</text>
-  <text x="124" y="232" class="sans muted" font-size="25">Turn scientific PNG diagrams into editable vector systems.</text>
-  <text x="124" y="266" class="sans muted" font-size="21">科研示意图 → 语义图元 → 可编辑矢量图</text>
+  <text x="118" y="194" class="serif ink" font-size="98" font-weight="700">FigVector</text>
+  <text x="124" y="244" class="sans muted" font-size="25">Turn scientific PNG diagrams into editable vector systems.</text>
+  <text x="124" y="280" class="sans muted" font-size="20">Raster matter, recovered as objects, arrows, layers, and exports.</text>
 
-  <g transform="translate(115 325)" filter="url(#softShadow)">
-    <rect width="390" height="315" rx="28" fill="#FFFDF8" stroke="#D9E2D8"/>
-    <text x="28" y="48" class="mono caption muted">SOURCE / RASTER SPECIMEN</text>
-    <text x="28" y="82" class="sans label ink">Nano Banana PNG</text>
-    <g transform="translate(34 112)">
-      <rect width="320" height="152" rx="20" fill="#F2EFE4" stroke="#CBD6CB"/>
+  <g transform="translate(118 326)" filter="url(#shadow)">
+    <rect width="418" height="338" rx="30" fill="url(#panel)" stroke="#D8E1D9"/>
+    <text x="30" y="48" class="mono caption muted">SOURCE / RASTER SPECIMEN</text>
+    <text x="30" y="82" class="sans label ink">Scientific PNG, still intact</text>
+
+    <g transform="translate(30 106)">
+      <rect width="358" height="172" rx="22" fill="#F4F1E6" stroke="#CDD8CF"/>
+      <rect width="358" height="172" rx="22" fill="url(#scan)" opacity="0.62"/>
       <g opacity="0.96">
-        <rect x="24" y="30" width="82" height="54" rx="14" fill="#5A84FF"/>
-        <rect x="139" y="30" width="82" height="54" rx="14" fill="#4EC48C"/>
-        <rect x="254" y="30" width="44" height="54" rx="14" fill="#FFAE56"/>
-        <line x1="107" y1="57" x2="139" y2="57" stroke="#2E3247" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
-        <line x1="222" y1="57" x2="254" y2="57" stroke="#2E3247" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
-        <circle cx="160" cy="118" r="27" fill="#7ABAFF"/>
-        <path d="M188 118H238V138H284" stroke="#2E3247" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="278" y="113" width="36" height="38" rx="10" fill="#F8DF8F"/>
+        <rect x="22" y="26" width="88" height="54" rx="15" fill="#567DF0"/>
+        <rect x="136" y="26" width="88" height="54" rx="15" fill="#5BBE85"/>
+        <rect x="250" y="26" width="52" height="54" rx="15" fill="#E7AA45"/>
+        <rect x="303" y="26" width="28" height="54" rx="13" fill="#D7E2D9" stroke="#B5C5BB"/>
+        <circle cx="71" cy="118" r="30" fill="#84B5FF" stroke="#355EAC" stroke-width="3"/>
+        <rect x="135" y="102" width="116" height="32" rx="16" fill="#EEDC9A" stroke="#D3A64E" stroke-width="2"/>
+        <line x1="110" y1="53" x2="136" y2="53" stroke="#243042" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
+        <line x1="224" y1="53" x2="250" y2="53" stroke="#243042" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
+        <path d="M102 118H136" stroke="#243042" stroke-width="7" stroke-linecap="round"/>
+        <path d="M251 118H301" stroke="#243042" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
+        <path d="M178 154C204 146 214 136 225 118C238 98 252 92 275 92" stroke="#243042" stroke-width="6" stroke-linecap="round" stroke-dasharray="8 10"/>
       </g>
-      <g opacity="0.35">
-        <rect x="29" y="36" width="6" height="6" fill="#FCF6E8"/>
-        <rect x="54" y="70" width="5" height="5" fill="#FCF6E8"/>
-        <rect x="147" y="38" width="5" height="5" fill="#FCF6E8"/>
-        <rect x="181" y="62" width="6" height="6" fill="#FCF6E8"/>
-        <rect x="260" y="42" width="4" height="4" fill="#FCF6E8"/>
+      <g opacity="0.42">
+        <rect x="28" y="34" width="6" height="6" fill="#FCF5E7"/>
+        <rect x="52" y="78" width="5" height="5" fill="#FCF5E7"/>
+        <rect x="162" y="32" width="5" height="5" fill="#FCF5E7"/>
+        <rect x="186" y="60" width="6" height="6" fill="#FCF5E7"/>
+        <rect x="286" y="40" width="4" height="4" fill="#FCF5E7"/>
+        <rect x="326" y="68" width="5" height="5" fill="#FCF5E7"/>
       </g>
     </g>
-    <g transform="translate(30 286)">
-      <circle cx="0" cy="0" r="4" fill="#5A84FF"/><circle cx="28" cy="0" r="4" fill="#4EC48C"/><circle cx="56" cy="0" r="4" fill="#FFAE56"/>
-      <text x="82" y="6" class="mono caption muted">pixels, colors, labels, arrows</text>
+
+    <g transform="translate(30 296)">
+      <circle cx="0" cy="0" r="4" fill="#567DF0"/>
+      <circle cx="28" cy="0" r="4" fill="#5BBE85"/>
+      <circle cx="56" cy="0" r="4" fill="#E7AA45"/>
+      <text x="80" y="6" class="mono caption muted">pixels, labels, colors, and rough geometry</text>
     </g>
   </g>
 
-  <g transform="translate(555 346)">
-    <path d="M0 110C72 25 162 26 240 109C316 190 404 191 480 108" stroke="#2E3247" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 16" marker-end="url(#arrow)"/>
-    <g transform="translate(132 0)">
-      <circle cx="110" cy="110" r="98" fill="#FFFFFF" fill-opacity="0.72" stroke="#2E3247" stroke-opacity="0.22"/>
-      <circle cx="110" cy="110" r="66" fill="#F8DF8F" fill-opacity="0.35" stroke="#FFAE56" stroke-width="2"/>
-      <path d="M66 112H154M110 68V156" stroke="#2E3247" stroke-width="4" stroke-linecap="round" opacity="0.48"/>
-      <text x="110" y="103" text-anchor="middle" class="mono caption ink">semantic</text>
-      <text x="110" y="128" text-anchor="middle" class="mono caption ink">lift</text>
+  <g transform="translate(555 286)">
+    <path d="M0 130C92 38 188 26 286 64C370 96 406 170 468 180" stroke="#243042" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 15" marker-end="url(#arrow)"/>
+    <path d="M0 150C90 74 176 56 258 74C356 96 398 166 468 198" stroke="#7C8AA6" stroke-opacity="0.65" stroke-width="2.5" stroke-linecap="round"/>
+
+    <g transform="translate(136 12)">
+      <circle cx="96" cy="128" r="116" fill="#FFFDF8" fill-opacity="0.76" stroke="#243042" stroke-opacity="0.2" stroke-width="2"/>
+      <circle cx="96" cy="128" r="82" fill="#EDF4EF" stroke="#D1DEDA" stroke-width="2"/>
+      <circle cx="96" cy="128" r="58" fill="#FFFFFF" stroke="#E2E8E6" stroke-width="2"/>
+      <circle cx="96" cy="128" r="30" fill="#EEDC9A" fill-opacity="0.85" stroke="#E0B35A" stroke-width="2"/>
+      <path d="M96 24V40M96 216V232M-8 128H8M184 128H200M28 60L40 72M152 184L164 196M28 196L40 184M152 72L164 60" stroke="#243042" stroke-width="4" stroke-linecap="round"/>
+      <path d="M64 128H128M96 96V160" stroke="#243042" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+      <text x="96" y="120" text-anchor="middle" class="mono micro muted">semantic</text>
+      <text x="96" y="139" text-anchor="middle" class="mono micro muted">lift</text>
+      <g filter="url(#softGlow)" opacity="0.56">
+        <path d="M20 128C36 94 58 72 96 64C136 56 160 74 172 106" stroke="#5BBE85" stroke-width="8" stroke-linecap="round"/>
+      </g>
     </g>
-    <text x="86" y="278" class="mono caption muted">SEGMENT · DETECT · RELATE · EXPORT · EVALUATE</text>
+
+    <text x="18" y="324" class="mono caption muted">decode · segment · detect · relate · export · review</text>
   </g>
 
-  <g transform="translate(1082 282)" filter="url(#softShadow)">
-    <rect width="408" height="415" rx="30" fill="#FFFFFF" stroke="#D6DFEA"/>
+  <g transform="translate(1084 254)" filter="url(#shadow)">
+    <rect width="404" height="390" rx="32" fill="#FFFFFF" stroke="#D6DFE4"/>
     <text x="30" y="52" class="mono caption muted">TARGET / EDITABLE SYSTEM</text>
     <text x="30" y="88" class="sans label ink">SVG + draw.io scene graph</text>
-    <g transform="translate(38 128)">
-      <rect x="0" y="0" width="332" height="210" rx="22" fill="#F8FBFC" stroke="#D6DFEA"/>
-      <g stroke="#2E3247" stroke-width="3" fill="none" opacity="0.85">
-        <rect x="35" y="38" width="88" height="58" rx="13"/>
-        <rect x="206" y="38" width="88" height="58" rx="13"/>
-        <circle cx="112" cy="154" r="32"/>
-        <rect x="230" y="136" width="72" height="48" rx="11"/>
-        <path d="M124 67H203" marker-end="url(#arrow)"/>
-        <path d="M145 154H190V164H230" stroke-linejoin="round"/>
+
+    <g transform="translate(34 116)">
+      <rect width="336" height="210" rx="24" fill="#F8FBFC" stroke="#D5DFE7"/>
+      <g stroke="#243042" stroke-width="3" fill="none" opacity="0.88">
+        <rect x="36" y="34" width="88" height="56" rx="14"/>
+        <rect x="206" y="34" width="88" height="56" rx="14"/>
+        <circle cx="112" cy="150" r="31"/>
+        <rect x="225" y="136" width="74" height="48" rx="12"/>
+        <path d="M124 62H202" marker-end="url(#arrow)"/>
+        <path d="M143 150H192V160H225" stroke-linejoin="round"/>
+        <path d="M75 90C102 104 122 121 136 150" stroke-dasharray="7 9"/>
       </g>
-      <g fill="#4EC48C">
-        <circle cx="35" cy="38" r="6"/><circle cx="123" cy="96" r="6"/><circle cx="206" cy="38" r="6"/><circle cx="294" cy="96" r="6"/>
-        <circle cx="112" cy="122" r="6"/><circle cx="144" cy="154" r="6"/><circle cx="230" cy="136" r="6"/><circle cx="302" cy="184" r="6"/>
+      <g fill="#5BBE85">
+        <circle cx="36" cy="34" r="6"/>
+        <circle cx="124" cy="90" r="6"/>
+        <circle cx="206" cy="34" r="6"/>
+        <circle cx="294" cy="90" r="6"/>
+        <circle cx="112" cy="119" r="6"/>
+        <circle cx="143" cy="150" r="6"/>
+        <circle cx="225" cy="136" r="6"/>
+        <circle cx="299" cy="184" r="6"/>
       </g>
-      <text x="36" y="124" class="mono caption muted">primitive-1</text>
-      <text x="204" y="124" class="mono caption muted">primitive-2</text>
-      <text x="57" y="198" class="mono caption muted">labels</text>
-      <text x="230" y="198" class="mono caption muted">flows_to</text>
+      <g class="mono caption muted">
+        <text x="36" y="124">primitive-1</text>
+        <text x="206" y="124">primitive-2</text>
+        <text x="58" y="196">labels</text>
+        <text x="230" y="196">connects_to</text>
+      </g>
     </g>
-    <g transform="translate(34 372)">
+
+    <g transform="translate(30 356)">
       <text x="0" y="0" class="mono caption muted">outputs</text>
-      <rect x="86" y="-20" width="72" height="30" rx="15" fill="#5A84FF"/><text x="122" y="1" text-anchor="middle" fill="#fff" class="mono" font-size="13">SVG</text>
-      <rect x="170" y="-20" width="96" height="30" rx="15" fill="#4EC48C"/><text x="218" y="1" text-anchor="middle" fill="#fff" class="mono" font-size="13">DRAW.IO</text>
-      <rect x="278" y="-20" width="78" height="30" rx="15" fill="#FFAE56"/><text x="317" y="1" text-anchor="middle" fill="#fff" class="mono" font-size="13">JSON</text>
+      <rect x="82" y="-20" width="72" height="30" rx="15" fill="#567DF0"/>
+      <text x="118" y="1" text-anchor="middle" fill="#fff" class="mono" font-size="13">SVG</text>
+      <rect x="168" y="-20" width="96" height="30" rx="15" fill="#5BBE85"/>
+      <text x="216" y="1" text-anchor="middle" fill="#fff" class="mono" font-size="13">DRAW.IO</text>
+      <rect x="276" y="-20" width="78" height="30" rx="15" fill="#E7AA45"/>
+      <text x="315" y="1" text-anchor="middle" fill="#fff" class="mono" font-size="13">JSON</text>
     </g>
   </g>
 
-  <g transform="translate(122 705)">
-    <rect width="1360" height="74" rx="24" fill="#FFFFFF" fill-opacity="0.72" stroke="#D6DFEA"/>
+  <g transform="translate(120 724)">
+    <rect width="1360" height="72" rx="22" fill="#FFFFFF" fill-opacity="0.72" stroke="#D6E0E7"/>
     <g class="mono caption muted">
-      <text x="38" y="45">01 decode</text>
-      <text x="228" y="45">02 segment</text>
-      <text x="430" y="45">03 primitives</text>
-      <text x="648" y="45">04 relations</text>
-      <text x="854" y="45">05 export</text>
-      <text x="1030" y="45">06 benchmark</text>
-      <text x="1248" y="45">07 refine</text>
+      <text x="36" y="44">01 decode</text>
+      <text x="222" y="44">02 segment</text>
+      <text x="428" y="44">03 classify</text>
+      <text x="616" y="44">04 relate</text>
+      <text x="802" y="44">05 export</text>
+      <text x="986" y="44">06 review</text>
+      <text x="1170" y="44">07 refine</text>
     </g>
-    <g stroke="#2E3247" stroke-opacity="0.28" stroke-width="2">
-      <path d="M184 38H208" marker-end="url(#arrow)"/><path d="M384 38H408" marker-end="url(#arrow)"/><path d="M604 38H628" marker-end="url(#arrow)"/>
-      <path d="M812 38H836" marker-end="url(#arrow)"/><path d="M990 38H1014" marker-end="url(#arrow)"/><path d="M1208 38H1232" marker-end="url(#arrow)"/>
+    <g stroke="#243042" stroke-opacity="0.28" stroke-width="2">
+      <path d="M176 38H206" marker-end="url(#arrow)"/>
+      <path d="M380 38H410" marker-end="url(#arrow)"/>
+      <path d="M568 38H598" marker-end="url(#arrow)"/>
+      <path d="M756 38H786" marker-end="url(#arrow)"/>
+      <path d="M940 38H970" marker-end="url(#arrow)"/>
+      <path d="M1124 38H1154" marker-end="url(#arrow)"/>
     </g>
   </g>
 
-  <g transform="translate(118 815)">
+  <g transform="translate(118 824)">
     <text class="serif ink" font-size="34" font-weight="700">Raster science, rebuilt as editable knowledge.</text>
-    <text x="860" y="1" class="mono caption muted">github.com/Jasvina/FigVector</text>
-    <text x="860" y="31" class="mono caption muted">dataset-register · dataset-run · dataset-eval · dataset-optimize</text>
+    <text x="872" y="1" class="mono caption muted">github.com/Jasvina/FigVector</text>
+    <text x="872" y="31" class="mono caption muted">source poster · vector source of truth · stable README preview</text>
   </g>
 </svg>

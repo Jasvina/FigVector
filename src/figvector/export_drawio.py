@@ -62,6 +62,8 @@ def _edge_cell(index: int, scene: SceneGraph, relation: Relation) -> str:
         style += 'endArrow=block;endFill=1;'
     elif relation.kind == 'labels':
         style += 'dashed=1;endArrow=none;strokeColor=#66728F;'
+    elif relation.kind == 'group_with':
+        style += 'dashed=1;endArrow=none;strokeColor=#9BA7BE;'
     else:
         style += 'endArrow=none;'
 

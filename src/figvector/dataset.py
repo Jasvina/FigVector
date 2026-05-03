@@ -9,7 +9,8 @@ from os.path import relpath
 from pathlib import Path
 from typing import Any
 
-from .eval import evaluate_scene
+from .eval import evaluate_payload, evaluate_scene
+from .models import SceneGraph
 from .ocr import OCRConfig
 from .pipeline import vectorize_png
 
@@ -58,7 +59,6 @@ def register_inbox_samples(root: str | Path, *, create_sidecars: bool = True) ->
     manifest_path = root / "manifest.json"
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     samples = list(payload.get("samples", []))
-    template = payload.get("sample_template", {})
     existing_pngs = {item.get("png") for item in samples}
     existing_ids = {item.get("id") for item in samples}
 
@@ -75,10 +75,7 @@ def register_inbox_samples(root: str | Path, *, create_sidecars: bool = True) ->
             "png": relative_png,
             "ocr_sidecar": str((root / "ocr_sidecars" / f"{sample_id}.ocr.json").relative_to(root)),
             "notes": "",
-            "expected": json.loads(json.dumps(template.get("expected", {}))),
         }
-        if not entry["expected"]:
-            entry.pop("expected")
         if create_sidecars:
             sidecar_path = root / entry["ocr_sidecar"]
             if not sidecar_path.exists():
@@ -181,6 +178,36 @@ def run_dataset(
     _write_markdown_report(destination / "report.md", results, title=f"FigVector dataset run ({profile})")
     _write_dataset_index(destination / "index.html", results, title=f"FigVector dataset run ({profile})")
     return results
+
+
+def write_vectorize_review_html(
+    review_path: str | Path,
+    *,
+    input_path: str | Path,
+    svg_path: str | Path,
+    scene: SceneGraph,
+    profile: str,
+    report_path: str | Path | None = None,
+    drawio_path: str | Path | None = None,
+    notes: str = "",
+) -> Path:
+    review_path = Path(review_path)
+    review_path.parent.mkdir(parents=True, exist_ok=True)
+    item = {
+        "id": Path(input_path).stem,
+        "input": str(Path(input_path)),
+        "svg": str(Path(svg_path)),
+        "report": str(Path(report_path)) if report_path is not None else None,
+        "drawio": str(Path(drawio_path)) if drawio_path is not None else None,
+        "profile": profile,
+        "primitive_counts": dict(sorted(Counter(primitive.kind for primitive in scene.primitives).items())),
+        "relation_counts": dict(sorted(Counter(relation.kind for relation in scene.relations).items())),
+        "text_count": len(scene.texts),
+        "evaluation": None,
+        "summary": None,
+    }
+    _write_sample_review_html(review_path, item, notes)
+    return review_path
 
 
 def evaluate_dataset(root: str | Path, *, output_dir: str | Path | None = None) -> list[dict[str, object]]:
@@ -312,6 +339,7 @@ def _manifest_template() -> dict[str, object]:
             "expected": "optional lightweight benchmark expectations",
         },
         "sample_template": {
+            "_note": "Reference template only. register_inbox_samples does not copy this block into new samples automatically.",
             "id": "replace-with-real-sample",
             "png": "inbox/replace-with-real-sample.png",
             "ocr_sidecar": "ocr_sidecars/replace-with-real-sample.ocr.json",
@@ -360,76 +388,8 @@ This scaffold exists so the repo can grow from a synthetic demo toward a real ev
 
 
 def _evaluate_payload(payload: dict[str, object], expected: dict[str, object] | None) -> dict[str, object] | None:
-    if not expected:
-        return None
-
-    primitive_counts = Counter(item.get("kind", "") for item in payload.get("primitives", []))
-    relation_counts = Counter(item.get("kind", "") for item in payload.get("relations", []))
-    text_values = [item.get("text", "") for item in payload.get("texts", [])]
-    checks: list[dict[str, object]] = []
-
-    for kind, expected_count in expected.get("primitive_counts", {}).items():
-        actual_count = primitive_counts.get(kind, 0)
-        checks.append(
-            {
-                "name": f"primitive_counts.{kind}",
-                "passed": int(expected_count) == int(actual_count),
-                "expected": int(expected_count),
-                "actual": int(actual_count),
-            }
-        )
-
-    for kind, expected_count in expected.get("relation_counts", {}).items():
-        actual_count = relation_counts.get(kind, 0)
-        checks.append(
-            {
-                "name": f"relation_counts.{kind}",
-                "passed": int(expected_count) == int(actual_count),
-                "expected": int(expected_count),
-                "actual": int(actual_count),
-            }
-        )
-
-    for text in expected.get("required_texts", []):
-        checks.append(
-            {
-                "name": f"required_texts.{text}",
-                "passed": text in text_values,
-                "expected": text,
-                "actual": text_values,
-            }
-        )
-
-    minimum = expected.get("min_primitives")
-    if minimum is not None:
-        checks.append(
-            {
-                "name": "min_primitives",
-                "passed": len(payload.get("primitives", [])) >= int(minimum),
-                "expected": int(minimum),
-                "actual": len(payload.get("primitives", [])),
-            }
-        )
-
-    minimum_texts = expected.get("min_texts")
-    if minimum_texts is not None:
-        checks.append(
-            {
-                "name": "min_texts",
-                "passed": len(payload.get("texts", [])) >= int(minimum_texts),
-                "expected": int(minimum_texts),
-                "actual": len(payload.get("texts", [])),
-            }
-        )
-
-    if not checks:
-        return {"passed": True, "score": 1.0, "checks": []}
-    passed_count = sum(1 for check in checks if check["passed"])
-    return {
-        "passed": passed_count == len(checks),
-        "score": round(passed_count / len(checks), 3),
-        "checks": checks,
-    }
+    result = evaluate_payload(payload, expected)
+    return result.to_dict() if result is not None else None
 
 
 def _slugify(value: str) -> str:
@@ -505,7 +465,140 @@ def _expected_from_report(report: dict[str, Any], *, required_text_limit: int) -
     if texts:
         deduped_texts = list(dict.fromkeys(texts))
         expected["required_texts"] = deduped_texts[: max(0, required_text_limit)]
+    label_expectations = _required_labels_from_report(report, texts)
+    if label_expectations:
+        expected["required_labels"] = label_expectations
+    object_relation_expectations = _required_object_relations_from_report(report)
+    if object_relation_expectations:
+        expected["required_object_relations"] = object_relation_expectations
+    group_expectations = _required_group_members_from_report(report)
+    if group_expectations:
+        expected["required_group_members"] = group_expectations
     return expected
+
+
+def _required_labels_from_report(report: dict[str, Any], texts: list[str]) -> list[dict[str, str]]:
+    primitives_by_id = {
+        str(item.get("metadata", {}).get("id", "")).strip(): item
+        for item in report.get("primitives", [])
+        if str(item.get("metadata", {}).get("id", "")).strip()
+    }
+    expectations: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    allowed_texts = set(texts)
+    for text_block in report.get("texts", []):
+        text = str(text_block.get("text", "")).strip()
+        if not text or text not in allowed_texts:
+            continue
+        label_for = str(text_block.get("metadata", {}).get("label_for", "")).strip()
+        primitive = primitives_by_id.get(label_for)
+        if primitive is None:
+            continue
+        target_kind = str(primitive.get("kind", "")).strip()
+        signature = (text, target_kind)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        expectations.append({"text": text, "target_kind": target_kind})
+    return expectations
+
+
+def _required_object_relations_from_report(report: dict[str, Any]) -> list[dict[str, str]]:
+    primitives_by_id = {
+        str(item.get("metadata", {}).get("id", "")).strip(): item
+        for item in report.get("primitives", [])
+        if str(item.get("metadata", {}).get("id", "")).strip()
+    }
+    labels_by_primitive: dict[str, list[str]] = {}
+    for text_block in report.get("texts", []):
+        label_for = str(text_block.get("metadata", {}).get("label_for", "")).strip()
+        text = str(text_block.get("text", "")).strip()
+        if not label_for or not text:
+            continue
+        labels_by_primitive.setdefault(label_for, [])
+        if text not in labels_by_primitive[label_for]:
+            labels_by_primitive[label_for].append(text)
+
+    expectations: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    for relation in report.get("relations", []):
+        kind = str(relation.get("kind", "")).strip()
+        if kind not in {"flows_to", "linked_to"}:
+            continue
+        source_id = str(relation.get("source_id", "")).strip()
+        target_id = str(relation.get("target_id", "")).strip()
+        source = primitives_by_id.get(source_id)
+        target = primitives_by_id.get(target_id)
+        if source is None or target is None:
+            continue
+        source_labels = labels_by_primitive.get(source_id, [])
+        target_labels = labels_by_primitive.get(target_id, [])
+        source_text = source_labels[0] if source_labels else ""
+        target_text = target_labels[0] if target_labels else ""
+        source_kind = str(source.get("kind", "")).strip()
+        target_kind = str(target.get("kind", "")).strip()
+        signature = (kind, source_text, target_text, source_kind, target_kind)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        expectations.append(
+            {
+                "kind": kind,
+                "source_text": source_text,
+                "target_text": target_text,
+                "source_kind": source_kind,
+                "target_kind": target_kind,
+            }
+        )
+    return expectations
+
+
+def _required_group_members_from_report(report: dict[str, Any]) -> list[dict[str, str]]:
+    primitives_by_id = {
+        str(item.get("metadata", {}).get("id", "")).strip(): item
+        for item in report.get("primitives", [])
+        if str(item.get("metadata", {}).get("id", "")).strip()
+    }
+    labels_by_primitive: dict[str, list[str]] = {}
+    for text_block in report.get("texts", []):
+        label_for = str(text_block.get("metadata", {}).get("label_for", "")).strip()
+        text = str(text_block.get("text", "")).strip()
+        if not label_for or not text:
+            continue
+        labels_by_primitive.setdefault(label_for, [])
+        if text not in labels_by_primitive[label_for]:
+            labels_by_primitive[label_for].append(text)
+
+    expectations: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for relation in report.get("relations", []):
+        if str(relation.get("kind", "")).strip() != "group_with":
+            continue
+        container_id = str(relation.get("source_id", "")).strip()
+        member_id = str(relation.get("target_id", "")).strip()
+        container = primitives_by_id.get(container_id)
+        member = primitives_by_id.get(member_id)
+        if container is None or member is None:
+            continue
+        container_labels = labels_by_primitive.get(container_id, [])
+        member_labels = labels_by_primitive.get(member_id, [])
+        container_text = container_labels[0] if container_labels else ""
+        member_text = member_labels[0] if member_labels else ""
+        container_kind = str(container.get("kind", "")).strip()
+        member_kind = str(member.get("kind", "")).strip()
+        signature = (container_text, member_text, container_kind, member_kind)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        expectations.append(
+            {
+                "container_text": container_text,
+                "member_text": member_text,
+                "container_kind": container_kind,
+                "member_kind": member_kind,
+            }
+        )
+    return expectations
 
 
 def _write_sample_summary(path: Path, item: dict[str, object], notes: str) -> None:
@@ -546,13 +639,24 @@ def _write_sample_summary(path: Path, item: dict[str, object], notes: str) -> No
 def _write_sample_review_html(path: Path, item: dict[str, object], notes: str) -> None:
     input_link = _relative_link(path.parent, Path(str(item["input"])))
     svg_link = _relative_link(path.parent, Path(str(item["svg"])))
-    report_link = _relative_link(path.parent, Path(str(item["report"])))
-    drawio_link = _relative_link(path.parent, Path(str(item["drawio"])))
-    summary_link = "summary.md"
+    report_value = item.get("report")
+    report_link = _relative_link(path.parent, Path(str(report_value))) if report_value else None
+    drawio_value = item.get("drawio")
+    drawio_link = _relative_link(path.parent, Path(str(drawio_value))) if drawio_value else None
+    summary_value = item.get("summary", "summary.md")
+    summary_link = _relative_link(path.parent, Path(str(summary_value))) if summary_value else None
     evaluation = item.get("evaluation") or {}
     checks = evaluation.get("checks", [])
     primitive_counts = item.get("primitive_counts", {})
     relation_counts = item.get("relation_counts", {})
+    artifact_links: list[str] = []
+    if summary_link:
+        artifact_links.append(f"<a href=\"{html_escape(summary_link)}\">summary.md</a>")
+    if report_link:
+        artifact_links.append(f"<a href=\"{html_escape(report_link)}\">report.json</a>")
+    if drawio_link:
+        artifact_links.append(f"<a href=\"{html_escape(drawio_link)}\">draw.io XML</a>")
+    artifact_links_html = " · ".join(artifact_links) if artifact_links else "No extra artifacts linked."
 
     html = f"""<!doctype html>
 <html lang="en">
@@ -578,7 +682,7 @@ def _write_sample_review_html(path: Path, item: dict[str, object], notes: str) -
   <header>
     <h1>FigVector review: <code>{html_escape(str(item['id']))}</code></h1>
     <p>Profile: <code>{html_escape(str(item.get('profile', '-')))}</code> | Score: <code>{html_escape(str(evaluation.get('score', '-')))}</code> | Passed: <code>{html_escape(str(evaluation.get('passed', '-')))}</code></p>
-    <p><a href="{html_escape(summary_link)}">summary.md</a> · <a href="{html_escape(report_link)}">report.json</a> · <a href="{html_escape(drawio_link)}">draw.io XML</a></p>
+    <p>{artifact_links_html}</p>
   </header>
   <main>
     <section class="grid">

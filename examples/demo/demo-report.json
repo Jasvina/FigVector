@@ -26,8 +26,10 @@
       "metadata": {
         "area": 21229,
         "fill_ratio": 0.983,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.017,
         "bbox_area": 21600,
-        "bucket": "rgb(72, 120, 240)",
+        "bucket": "rgb(80, 128, 240)",
         "id": "primitive-1"
       }
     },
@@ -49,8 +51,10 @@
       "metadata": {
         "area": 21200,
         "fill_ratio": 0.981,
+        "row_multi_ratio": 0.025,
+        "col_multi_ratio": 0.039,
         "bbox_area": 21600,
-        "bucket": "rgb(72, 192, 120)",
+        "bucket": "rgb(64, 192, 128)",
         "id": "primitive-2"
       }
     },
@@ -72,8 +76,10 @@
       "metadata": {
         "area": 17622,
         "fill_ratio": 0.979,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.027,
         "bbox_area": 18000,
-        "bucket": "rgb(240, 168, 72)",
+        "bucket": "rgb(240, 160, 80)",
         "id": "primitive-3"
       }
     },
@@ -95,9 +101,11 @@
       "metadata": {
         "area": 503,
         "fill_ratio": 0.395,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
         "direction": "right",
         "bbox_area": 1273,
-        "bucket": "rgb(24, 48, 48)",
+        "bucket": "rgb(32, 48, 64)",
         "id": "primitive-4",
         "connects_from": "primitive-1",
         "connects_to": "primitive-2"
@@ -121,9 +129,11 @@
       "metadata": {
         "area": 503,
         "fill_ratio": 0.395,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
         "direction": "right",
         "bbox_area": 1273,
-        "bucket": "rgb(24, 48, 48)",
+        "bucket": "rgb(32, 48, 64)",
         "id": "primitive-5",
         "connects_from": "primitive-2",
         "connects_to": "primitive-3"
@@ -147,8 +157,10 @@
       "metadata": {
         "area": 321,
         "fill_ratio": 0.412,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
         "bbox_area": 779,
-        "bucket": "rgb(24, 48, 48)",
+        "bucket": "rgb(32, 48, 64)",
         "id": "primitive-6"
       }
     },
@@ -170,8 +182,10 @@
       "metadata": {
         "area": 9826,
         "fill_ratio": 0.783,
+        "row_multi_ratio": 0.027,
+        "col_multi_ratio": 0.018,
         "bbox_area": 12544,
-        "bucket": "rgb(120, 168, 240)",
+        "bucket": "rgb(112, 176, 240)",
         "id": "primitive-7"
       }
     },
@@ -193,6 +207,8 @@
       "metadata": {
         "area": 1422,
         "fill_ratio": 0.16,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
         "points": [
           [
             434,
@@ -212,7 +228,7 @@
           ]
         ],
         "bbox_area": 8892,
-        "bucket": "rgb(24, 48, 48)",
+        "bucket": "rgb(32, 48, 64)",
         "id": "primitive-8",
         "connects_from": "primitive-7",
         "connects_to": "primitive-9"
@@ -236,8 +252,10 @@
       "metadata": {
         "area": 6816,
         "fill_ratio": 0.974,
+        "row_multi_ratio": 0.0,
+        "col_multi_ratio": 0.0,
         "bbox_area": 7000,
-        "bucket": "rgb(240, 216, 120)",
+        "bucket": "rgb(240, 208, 128)",
         "id": "primitive-9"
       }
     }

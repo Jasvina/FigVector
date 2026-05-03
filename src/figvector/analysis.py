@@ -68,15 +68,22 @@ class RasterAnalyzer:
         bbox_area = bbox.width * bbox.height
         fill_ratio = area / max(1, bbox_area)
         color = _average_color(image, component)
+        row_multi_ratio = _multi_segment_ratio(component, axis="row")
+        col_multi_ratio = _multi_segment_ratio(component, axis="col")
 
         kind = "region"
         confidence = 0.45
         metadata: dict[str, object] = {
             "area": area,
             "fill_ratio": round(fill_ratio, 3),
+            "row_multi_ratio": round(row_multi_ratio, 3),
+            "col_multi_ratio": round(col_multi_ratio, 3),
         }
 
-        if _looks_like_arrow(component, bbox):
+        if _looks_like_container_region(bbox, fill_ratio, row_multi_ratio, col_multi_ratio):
+            kind = "region"
+            confidence = 0.61
+        elif _looks_like_arrow(component, bbox):
             kind = "arrow"
             confidence = 0.74
             metadata["direction"] = _arrow_direction(component, bbox)
@@ -91,8 +98,12 @@ class RasterAnalyzer:
             kind = "rectangle"
             confidence = 0.86
         elif bbox.width > 10 and bbox.height > 10 and 0.45 <= fill_ratio <= 0.81:
-            kind = "ellipse"
-            confidence = 0.67
+            if _looks_like_ellipse(component, bbox):
+                kind = "ellipse"
+                confidence = 0.67
+            else:
+                kind = "region"
+                confidence = 0.58
         elif max(bbox.width, bbox.height) >= 24:
             kind = "region"
             confidence = 0.55
@@ -168,6 +179,38 @@ def _looks_like_polyline(component: list[tuple[int, int]], bbox: BoundingBox, fi
     if col_count < bbox.height * 0.55:
         return False
     return True
+
+
+def _looks_like_container_region(
+    bbox: BoundingBox,
+    fill_ratio: float,
+    row_multi_ratio: float,
+    col_multi_ratio: float,
+) -> bool:
+    if bbox.width < 140 or bbox.height < 120:
+        return False
+    if fill_ratio < 0.3:
+        return False
+    return max(row_multi_ratio, col_multi_ratio) >= 0.18
+
+
+def _looks_like_ellipse(component: list[tuple[int, int]], bbox: BoundingBox) -> bool:
+    if bbox.width < 18 or bbox.height < 18:
+        return False
+
+    horizontal_center = bbox.y + bbox.height // 2
+    vertical_center = bbox.x + bbox.width // 2
+    center_row_span = _span_on_axis(component, axis="row", anchor=horizontal_center)
+    center_col_span = _span_on_axis(component, axis="col", anchor=vertical_center)
+    if center_row_span < bbox.width * 0.5:
+        return False
+    if center_col_span < bbox.height * 0.5:
+        return False
+    edge_top = _edge_coverage(component, bbox, side="top")
+    edge_bottom = _edge_coverage(component, bbox, side="bottom")
+    edge_left = _edge_coverage(component, bbox, side="left")
+    edge_right = _edge_coverage(component, bbox, side="right")
+    return max(edge_top, edge_bottom, edge_left, edge_right) < 0.75
 
 
 def _polyline_points(component: list[tuple[int, int]], bbox: BoundingBox) -> list[list[int]]:
@@ -255,6 +298,54 @@ def _dedupe_points(points: list[list[int]]) -> list[list[int]]:
             continue
         deduped.append(point)
     return deduped
+
+
+def _multi_segment_ratio(component: list[tuple[int, int]], *, axis: str) -> float:
+    buckets: dict[int, list[int]] = defaultdict(list)
+    if axis == "row":
+        for x, y in component:
+            buckets[y].append(x)
+    else:
+        for x, y in component:
+            buckets[x].append(y)
+    if not buckets:
+        return 0.0
+
+    multi_segment_count = 0
+    for values in buckets.values():
+        values.sort()
+        segments = 1
+        for previous, current in zip(values, values[1:]):
+            if current != previous + 1:
+                segments += 1
+        if segments >= 2:
+            multi_segment_count += 1
+    return multi_segment_count / len(buckets)
+
+
+def _span_on_axis(component: list[tuple[int, int]], *, axis: str, anchor: int) -> int:
+    if axis == "row":
+        values = [x for x, y in component if abs(y - anchor) <= 1]
+    else:
+        values = [y for x, y in component if abs(x - anchor) <= 1]
+    if not values:
+        return 0
+    return max(values) - min(values) + 1
+
+
+def _edge_coverage(component: list[tuple[int, int]], bbox: BoundingBox, *, side: str) -> float:
+    points = set(component)
+    if side == "top":
+        edge_points = [(x, bbox.y) for x in range(bbox.x, bbox.x2)]
+    elif side == "bottom":
+        edge_points = [(x, bbox.y2 - 1) for x in range(bbox.x, bbox.x2)]
+    elif side == "left":
+        edge_points = [(bbox.x, y) for y in range(bbox.y, bbox.y2)]
+    else:
+        edge_points = [(bbox.x2 - 1, y) for y in range(bbox.y, bbox.y2)]
+    if not edge_points:
+        return 0.0
+    return sum(1 for point in edge_points if point in points) / len(edge_points)
 
 
 def _arrow_direction(component: list[tuple[int, int]], bbox: BoundingBox) -> str:

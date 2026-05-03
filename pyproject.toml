@@ -19,6 +19,12 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Jasvina/FigVector"
+Repository = "https://github.com/Jasvina/FigVector"
+Issues = "https://github.com/Jasvina/FigVector/issues"
+Documentation = "https://github.com/Jasvina/FigVector#readme"
+
 [project.scripts]
 figvector = "figvector.cli:main"
 

@@ -1,0 +1,64 @@
+{
+  "texts": [
+    {
+      "text": "Input",
+      "bbox": {
+        "x": 82,
+        "y": 162,
+        "width": 60,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Workspace",
+      "bbox": {
+        "x": 355,
+        "y": 78,
+        "width": 150,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Detect",
+      "bbox": {
+        "x": 295,
+        "y": 150,
+        "width": 75,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Refine",
+      "bbox": {
+        "x": 475,
+        "y": 150,
+        "width": 80,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Review",
+      "bbox": {
+        "x": 392,
+        "y": 274,
+        "width": 80,
+        "height": 24
+      },
+      "confidence": 0.99
+    },
+    {
+      "text": "Export",
+      "bbox": {
+        "x": 730,
+        "y": 274,
+        "width": 75,
+        "height": 24
+      },
+      "confidence": 0.99
+    }
+  ]
+}

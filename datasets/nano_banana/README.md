@@ -6,6 +6,7 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
 
 1. Put real PNG files in `inbox/`.
 2. Run `figvector dataset-register datasets/nano_banana` to register new PNGs into the manifest and create empty OCR sidecars.
+   This only records the sample and sidecar path; it does not copy the example `sample_template.expected` block into every new sample.
 3. Fill OCR sidecars in `ocr_sidecars/` using the format:
    ```json
    {
@@ -19,6 +20,23 @@ This folder is the local workspace for collecting and evaluating real Nano Banan
    }
    ```
 4. Optionally add an `expected` block per sample in `manifest.json` for lightweight benchmark checks.
+   In addition to count-based checks, you can now encode semantic expectations such as:
+   ```json
+   {
+     "required_labels": [
+       {"text": "EGFR", "target_kind": "rectangle"}
+     ],
+     "required_object_relations": [
+       {
+         "kind": "flows_to",
+         "source_text": "EGFR",
+         "target_text": "RAS",
+         "source_kind": "rectangle",
+         "target_kind": "rectangle"
+       }
+     ]
+   }
+   ```
 5. Run `figvector dataset-run datasets/nano_banana --ocr-backend sidecar-json --profile real`.
 6. Run `figvector dataset-bootstrap-expected datasets/nano_banana` if you want to seed missing `expected` blocks from the current reports as a starting point.
 7. Inspect `outputs/index.html`, `outputs/<sample-id>/review.html`, `outputs/<sample-id>/summary.md`, `outputs/report.md`, and `outputs/evaluation-report.md` for generated artifacts and summaries.

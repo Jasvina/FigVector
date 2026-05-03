@@ -55,7 +55,17 @@ For the current implementation status, verification notes, and future optimizati
 
 | Input PNG | Output SVG | Extra artifacts |
 | --- | --- | --- |
-| ![demo input](examples/demo/demo-input.png) | ![demo output](examples/demo/demo-output.svg) | `examples/demo/demo-input.ocr.json`, `examples/demo/demo-output.drawio`, `examples/demo/demo-report.json` |
+| ![demo input](examples/demo/demo-input.png) | ![demo output](examples/demo/demo-output.svg) | `examples/demo/demo-input.ocr.json`, `examples/demo/demo-output.drawio`, `examples/demo/demo-report.json`, `examples/demo/demo-review.html` |
+
+`examples/demo/demo-review.html` 是这个 basic demo 的快速人工验收入口：它把输入 PNG、重建 SVG 和相关报告放在同一页，方便第一时间肉眼检查结果。
+
+### Nested/group demo
+
+| Input PNG | Output SVG | Extra artifacts |
+| --- | --- | --- |
+| ![nested demo input](examples/demo/nested-demo-input.png) | ![nested demo output](examples/demo/nested-demo-output.svg) | `examples/demo/nested-demo-input.ocr.json`, `examples/demo/nested-demo-output.drawio`, `examples/demo/nested-demo-report.json`, `examples/demo/nested-demo-review.html` |
+
+`examples/demo/nested-demo-review.html` 也是快速人工验收入口；它保留了 nested demo 的容器分组、嵌套 target 和 connector 纠错场景，适合在改动后快速确认复杂回归样本没有退化。
 
 ## MVP direction
 
@@ -120,6 +130,12 @@ flowchart LR
 PYTHONPATH=src python3 -m figvector demo --output-dir examples/demo
 ```
 
+如果你想直接生成更复杂的容器/嵌套示例，可以用：
+
+```bash
+PYTHONPATH=src python3 -m figvector demo --variant nested --output-dir examples/demo
+```
+
 ### 2. Vectorize your own PNG
 
 ```bash
@@ -127,9 +143,12 @@ PYTHONPATH=src python3 -m figvector vectorize path/to/input.png \
   -o output.svg \
   --report output.json \
   --drawio-output output.drawio \
+  --review-html output-review.html \
   --ocr-backend sidecar-json \
   --ocr-sidecar path/to/input.ocr.json
 ```
+
+如果你想先做人眼检查，这个 `output-review.html` 会生成一个并排预览页，方便快速比较输入 PNG 和当前 SVG 重建结果。
 
 ### 3. Create the real-sample scaffold
 
@@ -148,6 +167,8 @@ PYTHONPATH=src python3 -m figvector dataset-run datasets/nano_banana --ocr-backe
 ```bash
 PYTHONPATH=src python3 -m figvector dataset-register datasets/nano_banana
 ```
+
+这个命令只会登记样本与 OCR sidecar 路径，不会自动把示例 `expected` 模板灌进每个新样本，避免一开始就带着不真实的 benchmark 约束跑偏。
 
 ### 6. Evaluate dataset outputs
 

@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from . import __version__
 from .dataset import (
     bootstrap_expected_from_outputs,
     create_dataset_scaffold,
@@ -11,6 +12,7 @@ from .dataset import (
     optimize_dataset,
     register_inbox_samples,
     run_dataset,
+    write_vectorize_review_html,
 )
 from .demo import build_demo_assets
 from .ocr import OCRConfig
@@ -19,6 +21,7 @@ from .pipeline import vectorize_png
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="FigVector: vectorize clean PNG diagrams into editable SVG.")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     vectorize = subparsers.add_parser("vectorize", help="Convert a PNG into an SVG and optional JSON report.")
@@ -26,6 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
     vectorize.add_argument("-o", "--output", required=True, help="Path to the output SVG file.")
     vectorize.add_argument("--report", help="Optional JSON report path.")
     vectorize.add_argument("--drawio-output", help="Optional draw.io XML output path.")
+    vectorize.add_argument("--review-html", help="Optional HTML side-by-side review page for the current run.")
     vectorize.add_argument("--profile", default="real", choices=["synthetic", "real"], help="Analysis profile preset.")
     vectorize.add_argument("--background-threshold", type=int, help="Color distance threshold for foreground detection.")
     vectorize.add_argument("--min-area", type=int, help="Minimum connected-component area to keep.")
@@ -35,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     demo = subparsers.add_parser("demo", help="Generate a synthetic demo PNG and vectorize it.")
     demo.add_argument("--output-dir", default="examples/demo", help="Directory where demo assets will be written.")
+    demo.add_argument("--variant", default="basic", choices=["basic", "nested"], help="Demo scene variant to generate.")
 
     dataset_init = subparsers.add_parser("dataset-init", help="Create a real-sample dataset scaffold for Nano Banana PNGs.")
     dataset_init.add_argument("root", nargs="?", default="datasets/nano_banana", help="Dataset root directory.")
@@ -71,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "vectorize":
-        vectorize_png(
+        scene = vectorize_png(
             input_path=args.input,
             output_path=args.output,
             report_path=args.report,
@@ -87,15 +92,27 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Wrote report to {Path(args.report).resolve()}")
         if args.drawio_output:
             print(f"Wrote draw.io file to {Path(args.drawio_output).resolve()}")
+        if args.review_html:
+            review_path = write_vectorize_review_html(
+                args.review_html,
+                input_path=args.input,
+                svg_path=args.output,
+                report_path=args.report,
+                drawio_path=args.drawio_output,
+                scene=scene,
+                profile=args.profile,
+            )
+            print(f"Wrote review HTML to {review_path.resolve()}")
         return 0
 
     if args.command == "demo":
-        result = build_demo_assets(args.output_dir)
+        result = build_demo_assets(args.output_dir, variant=args.variant)
         print(f"Wrote demo PNG to {result['png'].resolve()}")
         print(f"Wrote demo OCR sidecar to {result['ocr'].resolve()}")
         print(f"Wrote demo SVG to {result['svg'].resolve()}")
         print(f"Wrote demo report to {result['report'].resolve()}")
         print(f"Wrote demo draw.io file to {result['drawio'].resolve()}")
+        print(f"Wrote demo review HTML to {result['review'].resolve()}")
         return 0
 
     if args.command == "dataset-init":

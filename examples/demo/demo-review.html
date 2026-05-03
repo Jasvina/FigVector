@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FigVector review - demo-input</title>
+  <style>
+    body { margin: 0; font-family: Avenir, Helvetica, Arial, sans-serif; background: #fbfaf6; color: #2e3247; }
+    header { padding: 24px 32px; border-bottom: 1px solid #d8e0ee; background: #fff; }
+    main { padding: 24px 32px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .card { background: #fff; border: 1px solid #d8e0ee; border-radius: 18px; padding: 18px; box-shadow: 0 12px 30px rgba(46, 50, 71, 0.08); }
+    img, object { width: 100%; height: 560px; object-fit: contain; background: #fff; border-radius: 12px; border: 1px solid #edf1f7; }
+    code { background: #edf1f7; padding: 2px 6px; border-radius: 6px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border-bottom: 1px solid #edf1f7; padding: 8px; text-align: left; }
+    .pass { color: #2f805b; font-weight: 700; }
+    .fail { color: #b84a4a; font-weight: 700; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } img, object { height: 360px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FigVector review: <code>demo-input</code></h1>
+    <p>Profile: <code>real</code> | Score: <code>-</code> | Passed: <code>-</code></p>
+    <p><a href="demo-report.json">report.json</a> · <a href="demo-output.drawio">draw.io XML</a></p>
+  </header>
+  <main>
+    <section class="grid">
+      <article class="card">
+        <h2>Input PNG</h2>
+        <img src="demo-input.png" alt="Input PNG">
+      </article>
+      <article class="card">
+        <h2>Output SVG</h2>
+        <object data="demo-output.svg" type="image/svg+xml"></object>
+      </article>
+    </section>
+    <section class="grid" style="margin-top:20px">
+      <article class="card">
+        <h2>Primitive counts</h2>
+        <table><thead><tr><th>Kind</th><th>Count</th></tr></thead><tbody><tr><td><code>arrow</code></td><td>2</td></tr>
+<tr><td><code>ellipse</code></td><td>1</td></tr>
+<tr><td><code>polyline</code></td><td>1</td></tr>
+<tr><td><code>rectangle</code></td><td>4</td></tr>
+<tr><td><code>region</code></td><td>1</td></tr></tbody></table>
+      </article>
+      <article class="card">
+        <h2>Relation counts</h2>
+        <table><thead><tr><th>Kind</th><th>Count</th></tr></thead><tbody><tr><td><code>flows_to</code></td><td>2</td></tr>
+<tr><td><code>labels</code></td><td>5</td></tr>
+<tr><td><code>linked_to</code></td><td>1</td></tr></tbody></table>
+      </article>
+    </section>
+    <section class="card" style="margin-top:20px">
+      <h2>Evaluation checks</h2>
+      <p>No checks available.</p>
+    </section>
+    <section class="card" style="margin-top:20px">
+      <h2>Notes</h2>
+      <p>Baseline clean pipeline sample covering boxes, arrows, a polyline, and text labels.</p>
+    </section>
+  </main>
+</body>
+</html>

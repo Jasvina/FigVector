@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .dataset import write_vectorize_review_html
 from .models import RasterImage
 from .ocr import OCRConfig
 from .pipeline import vectorize_png
@@ -13,31 +14,69 @@ BLUE = (90, 132, 255, 255)
 GREEN = (78, 196, 140, 255)
 ORANGE = (255, 174, 86, 255)
 INK = (46, 50, 71, 255)
+GROUP = (226, 233, 242, 255)
+SAND = (248, 223, 143, 255)
 
 
-def build_demo_assets(output_dir: str | Path) -> dict[str, Path]:
+def build_demo_assets(output_dir: str | Path, *, variant: str = "basic") -> dict[str, Path]:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    png_path = output_dir / "demo-input.png"
-    ocr_path = output_dir / "demo-input.ocr.json"
-    svg_path = output_dir / "demo-output.svg"
-    report_path = output_dir / "demo-report.json"
-    drawio_path = output_dir / "demo-output.drawio"
+    spec = _demo_spec(variant)
+    png_path = output_dir / f"{spec['stem']}-input.png"
+    ocr_path = output_dir / f"{spec['stem']}-input.ocr.json"
+    svg_path = output_dir / f"{spec['stem']}-output.svg"
+    report_path = output_dir / f"{spec['stem']}-report.json"
+    drawio_path = output_dir / f"{spec['stem']}-output.drawio"
+    review_path = output_dir / f"{spec['stem']}-review.html"
 
-    image = _demo_image()
-    write_png(png_path, image)
-    ocr_path.write_text(json.dumps(_demo_ocr_sidecar(), indent=2), encoding="utf-8")
-    vectorize_png(
+    write_png(png_path, spec["image"]())
+    ocr_path.write_text(json.dumps(spec["ocr"](), indent=2), encoding="utf-8")
+    scene = vectorize_png(
         png_path,
         svg_path,
         report_path=report_path,
         drawio_path=drawio_path,
         ocr=OCRConfig(backend="sidecar-json", sidecar_path=str(ocr_path)),
     )
-    return {"png": png_path, "ocr": ocr_path, "svg": svg_path, "report": report_path, "drawio": drawio_path}
+    write_vectorize_review_html(
+        review_path,
+        input_path=png_path,
+        svg_path=svg_path,
+        report_path=report_path,
+        drawio_path=drawio_path,
+        scene=scene,
+        profile="real",
+        notes=str(spec.get("notes", "")),
+    )
+    return {
+        "png": png_path,
+        "ocr": ocr_path,
+        "svg": svg_path,
+        "report": report_path,
+        "drawio": drawio_path,
+        "review": review_path,
+    }
 
 
-def _demo_image() -> RasterImage:
+def _demo_spec(variant: str) -> dict[str, object]:
+    if variant == "nested":
+        return {
+            "stem": "nested-demo",
+            "image": _nested_demo_image,
+            "ocr": _nested_demo_ocr_sidecar,
+            "notes": "Nested/group regression sample covering container regions, internal nodes, and connector disambiguation.",
+        }
+    if variant != "basic":
+        raise ValueError(f"Unsupported demo variant: {variant}")
+    return {
+        "stem": "demo",
+        "image": _basic_demo_image,
+        "ocr": _basic_demo_ocr_sidecar,
+        "notes": "Baseline clean pipeline sample covering boxes, arrows, a polyline, and text labels.",
+    }
+
+
+def _basic_demo_image() -> RasterImage:
     width, height = 760, 420
     pixels = [[WHITE for _ in range(width)] for _ in range(height)]
 
@@ -58,7 +97,7 @@ def _demo_image() -> RasterImage:
     return RasterImage(width=width, height=height, pixels=pixels)
 
 
-def _demo_ocr_sidecar() -> dict[str, object]:
+def _basic_demo_ocr_sidecar() -> dict[str, object]:
     return {
         "texts": [
             {"text": "Prompt", "bbox": {"x": 100, "y": 130, "width": 90, "height": 24}, "confidence": 0.99},
@@ -66,6 +105,46 @@ def _demo_ocr_sidecar() -> dict[str, object]:
             {"text": "Output", "bbox": {"x": 575, "y": 130, "width": 90, "height": 24}, "confidence": 0.99},
             {"text": "Signal", "bbox": {"x": 347, "y": 293, "width": 75, "height": 24}, "confidence": 0.98},
             {"text": "Editable", "bbox": {"x": 600, "y": 337, "width": 90, "height": 24}, "confidence": 0.98},
+        ]
+    }
+
+
+def _nested_demo_image() -> RasterImage:
+    width, height = 880, 460
+    pixels = [[WHITE for _ in range(width)] for _ in range(height)]
+
+    _rounded_rect(pixels, 220, 60, 420, 280, 24, GROUP)
+    _rounded_rect(pixels, 40, 130, 140, 90, 18, ORANGE)
+    _rounded_rect(pixels, 270, 120, 120, 80, 18, BLUE)
+    _rounded_rect(pixels, 450, 120, 120, 80, 18, GREEN)
+    _rounded_rect(pixels, 360, 250, 140, 70, 16, SAND)
+    _rounded_rect(pixels, 700, 250, 120, 70, 16, (122, 186, 255, 255))
+
+    _line(pixels, 180, 175, 270, 175, INK, 6)
+    _arrow_head(pixels, 270, 175, "right", INK)
+
+    _line(pixels, 390, 160, 450, 160, INK, 6)
+    _arrow_head(pixels, 450, 160, "right", INK)
+
+    _line(pixels, 570, 160, 620, 160, INK, 6)
+    _line(pixels, 620, 160, 620, 285, INK, 6)
+    _line(pixels, 620, 285, 500, 285, INK, 6)
+
+    _line(pixels, 500, 285, 700, 285, INK, 6)
+    _arrow_head(pixels, 700, 285, "right", INK)
+
+    return RasterImage(width=width, height=height, pixels=pixels)
+
+
+def _nested_demo_ocr_sidecar() -> dict[str, object]:
+    return {
+        "texts": [
+            {"text": "Input", "bbox": {"x": 82, "y": 162, "width": 60, "height": 24}, "confidence": 0.99},
+            {"text": "Workspace", "bbox": {"x": 355, "y": 78, "width": 150, "height": 24}, "confidence": 0.99},
+            {"text": "Detect", "bbox": {"x": 295, "y": 150, "width": 75, "height": 24}, "confidence": 0.99},
+            {"text": "Refine", "bbox": {"x": 475, "y": 150, "width": 80, "height": 24}, "confidence": 0.99},
+            {"text": "Review", "bbox": {"x": 392, "y": 274, "width": 80, "height": 24}, "confidence": 0.99},
+            {"text": "Export", "bbox": {"x": 730, "y": 274, "width": 75, "height": 24}, "confidence": 0.99},
         ]
     }
 
